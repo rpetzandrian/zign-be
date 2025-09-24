@@ -1,0 +1,3 @@
+export const DEFAULT_TIMEOUT = {
+    FIVE_MINUTES: 300000
+};
