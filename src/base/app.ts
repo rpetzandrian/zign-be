@@ -1,4 +1,6 @@
 import express from 'express';
+import GlobalExceptionHandler from './global_exception_handler';
+import NotFoundExceptionHandler from './not_found_error_handler';
 
 export class BaseApp {
     protected _port : number
@@ -11,6 +13,12 @@ export class BaseApp {
     public async initialize(): Promise<void> {
         this.initPluggins()
         await this.initServices()
+        await this.initExceptionHandlers();
+    }
+
+    private async initExceptionHandlers(): Promise<void> {
+        this._app.use(NotFoundExceptionHandler);
+        this._app.use(GlobalExceptionHandler);
     }
 
     public async startApp(): Promise<this> {

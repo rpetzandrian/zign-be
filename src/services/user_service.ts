@@ -1,5 +1,5 @@
 
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Service } from "../base/service"
 import UserRepository from "../repository/user_repository";
 
@@ -22,7 +22,7 @@ export class UserService extends Service {
 
     protected setRoutes(): void {
         this._routes.get('/', (req, res) => {
-            return this.findAllUsers(req, res)
+            return this.findAllUsers(req, res,)
         })
     }
 }
