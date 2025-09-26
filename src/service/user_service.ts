@@ -12,19 +12,16 @@ export class UserService extends Service {
         this.userRepository = userRepository
     }
 
-    public async findAllUsers(req: Request, res: Response) {
+    public async findAllUsers(data: any) {
         const user = await this.userRepository.findAll();
-        return res.send({
-            message: 'success',
-            data: user
-        })
+        return user
     }
 
-    protected setRoutes(): void {
-        this._routes.get('/', (req, res) => {
-            return this.findAllUsers(req, res,)
-        })
-    }
+    // protected setRoutes(): void {
+    //     this._routes.get('/', (req, res) => {
+    //         return this.findAllUsers(req, res,)
+    //     })
+    // }
 }
 
 export default UserService

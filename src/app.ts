@@ -1,9 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import UserRepository from './repository/user_repository';
-import { UserService } from './services/user_service';
+import { UserService } from './service/user_service';
 import express from 'express';
 import BaseApp from './base/app';
 import { getPrismaClientWithSoftDelete } from './base/prisma_middleware';
+import { UserController } from './controller/user_controller';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
@@ -26,11 +27,17 @@ class App extends BaseApp {
         const prisma = getPrismaClientWithSoftDelete(prismaClient)
         await prisma.$connect()
 
+        /** Initialize repositories */
         const userRepository = new UserRepository(prisma);
 
+        /** Initialize services */
         const userService = new UserService(userRepository)
 
-        this._app.use('/users', userService._routes)
+        /** Initialize controllers */
+        const userController = new UserController(userService);
+
+        /** Register routes */
+        this._app.use('/', userController._routes)
     }
 }
 
