@@ -12,6 +12,7 @@ export class BaseApp {
 
     public async initialize(): Promise<void> {
         this.initPluggins()
+        this.initProviders()
         await this.initServices()
         await this.initExceptionHandlers();
     }
@@ -30,6 +31,10 @@ export class BaseApp {
     }
 
     protected initPluggins() {
+        /** Impement in child classes */
+    }
+
+    protected initProviders() {
         /** Impement in child classes */
     }
 

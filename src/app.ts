@@ -5,6 +5,10 @@ import express from 'express';
 import BaseApp from './base/app';
 import { getPrismaClientWithSoftDelete } from './base/prisma_middleware';
 import { UserController } from './controller/user_controller';
+import { EmailService } from './service/email_service';
+import { AuthService } from './service/auth_service';
+import MailtrapEmailProvider from './lib/email_provider';
+import { AuthController } from './controller/auth_controller';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
@@ -22,21 +26,32 @@ class App extends BaseApp {
         })
     }
 
+    protected initProviders() {
+        MailtrapEmailProvider.initialize();
+    }
+
     protected async initServices() {
         const prismaClient = new PrismaClient({})
         const prisma = getPrismaClientWithSoftDelete(prismaClient)
         await prisma.$connect()
 
+        /** Initialize providers */
+        const emailProvider = new MailtrapEmailProvider()
+
         /** Initialize repositories */
         const userRepository = new UserRepository(prisma);
 
         /** Initialize services */
-        const userService = new UserService(userRepository)
+        const userService = new UserService(userRepository);
+        const emailService = new EmailService(emailProvider);
+        const authService = new AuthService(userRepository, emailService);
 
         /** Initialize controllers */
+        const authController = new AuthController(authService);
         const userController = new UserController(userService);
 
         /** Register routes */
+        this._app.use('/', authController._routes)
         this._app.use('/', userController._routes)
     }
 }
