@@ -9,6 +9,8 @@ import { EmailService } from './service/email_service';
 import { AuthService } from './service/auth_service';
 import MailtrapEmailProvider from './lib/email_provider';
 import { AuthController } from './controller/auth_controller';
+import EventProvider from './lib/event_provider';
+import { SendEmailSubscriber } from './subsriber/send_email_subscriber';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
@@ -26,7 +28,9 @@ class App extends BaseApp {
         })
     }
 
-    protected initProviders() {
+    protected async initProviders() {
+        /** Initialize providers */
+        await EventProvider.initialize();
         MailtrapEmailProvider.initialize();
     }
 
@@ -37,6 +41,7 @@ class App extends BaseApp {
 
         /** Initialize providers */
         const emailProvider = new MailtrapEmailProvider()
+        const eventProvider = new EventProvider();
 
         /** Initialize repositories */
         const userRepository = new UserRepository(prisma);
@@ -44,15 +49,21 @@ class App extends BaseApp {
         /** Initialize services */
         const userService = new UserService(userRepository);
         const emailService = new EmailService(emailProvider);
-        const authService = new AuthService(userRepository, emailService);
+        const authService = new AuthService(userRepository);
 
         /** Initialize controllers */
         const authController = new AuthController(authService);
         const userController = new UserController(userService);
 
+        /** Initialize event subscribers */
+        const sendEmailSubscriber = new SendEmailSubscriber(emailService);
+
         /** Register routes */
         this._app.use('/', authController._routes)
         this._app.use('/', userController._routes)
+
+        /** Register event subscribers */
+        eventProvider.subscribe(sendEmailSubscriber);
     }
 }
 

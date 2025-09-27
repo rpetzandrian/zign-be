@@ -4,17 +4,15 @@ import UserRepository from "../repository/user_repository";
 import { BadRequestError } from "../base/http_error";
 import hashPassword from "../lib/hash";
 import { EmailService } from "./email_service";
-import { EMAIL_CODE, OTP_CODE_EXPIRED } from "../entity/constant/common";
+import { EMAIL_CODE, EVENT_LIST, OTP_CODE_EXPIRED } from "../entity/constant/common";
 
 
 export class AuthService extends Service {
     private userRepository: UserRepository;
-    private emailService: EmailService;
 
-    constructor(userRepository: UserRepository, emailService: EmailService) {
+    constructor(userRepository: UserRepository) {
         super()
         this.userRepository = userRepository
-        this.emailService = emailService
     }
 
     private async generateOtpCodeAndExpired(): Promise<{ code: string, expired: Date }> {
@@ -32,7 +30,7 @@ export class AuthService extends Service {
 
     private async sendOtpCodeToEmail(email: string, code: string): Promise<void> {
         // Send OTP code to user email
-        await this.emailService.send({
+        await this.event.publish(EVENT_LIST.SEND_EMAIL, {
             code : EMAIL_CODE.OTP,
             to: [email],
             parameters: {
