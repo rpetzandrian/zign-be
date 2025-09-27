@@ -1,10 +1,10 @@
-import { RegisterUserDto } from "../entity/dto/auth";
+import { RegisterUserDto, UserTokenResponse } from "../entity/dto/auth";
 import { Service } from "../base/service";
 import UserRepository from "../repository/user_repository";
 import { BadRequestError } from "../base/http_error";
 import hashPassword from "../lib/hash";
-import { EmailService } from "./email_service";
 import { EMAIL_CODE, EVENT_LIST, OTP_CODE_EXPIRED } from "../entity/constant/common";
+import { generateJwtToken } from "../lib/jwt";
 
 
 export class AuthService extends Service {
@@ -39,7 +39,7 @@ export class AuthService extends Service {
         });
     }
 
-    public async registerUser(data: RegisterUserDto): Promise<void> {
+    public async registerUser(data: RegisterUserDto): Promise<UserTokenResponse> {
         if (data.password !== data.confirm_password) {
             throw new BadRequestError('Password and confirm password must be same')
         }
@@ -57,5 +57,15 @@ export class AuthService extends Service {
 
         // Send OTP code to user email
         await this.sendOtpCodeToEmail(user.email, code);
+
+        // Generate token
+        const token = generateJwtToken(user.id as string);
+
+        return { token, expires_in: Number(process.env.JWT_LIFETIME) };
+    }
+
+    async resendOtpEmail(userId: string): Promise<void> {
+        const user = await this.userRepository.findOneOrFail({ id: userId });  
+        await this.sendOtpCodeToEmail(user.email, user.otp_code as string);
     }
 }

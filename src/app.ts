@@ -31,7 +31,10 @@ class App extends BaseApp {
     protected async initProviders() {
         /** Initialize providers */
         await EventProvider.initialize();
-        MailtrapEmailProvider.initialize();
+
+        if (process.env.FEATURE_TURN_OFF_EMAIL !== '1') {
+            MailtrapEmailProvider.initialize();
+        }
     }
 
     protected async initServices() {

@@ -1,5 +1,5 @@
 export const DEFAULT_TIMEOUT = {
-    FIVE_MINUTES: 300000
+    FIVE_MINUTES: 300000,
 };
 
 export const OTP_CODE_EXPIRED = 10;

@@ -1,5 +1,6 @@
 export interface BaseModel {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    id: string | number;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date | null;
 }

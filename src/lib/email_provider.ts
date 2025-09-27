@@ -1,5 +1,6 @@
 import * as mailer from 'nodemailer';
 import { EmailProviderSendPayload } from '../entity/interface/mail';
+import logger from './logger';
 
 export class MailtrapEmailProvider {
     static instance: mailer.Transporter | null =  null;
@@ -22,7 +23,8 @@ export class MailtrapEmailProvider {
 
     public async send(payload: EmailProviderSendPayload): Promise<void> {
         if (!MailtrapEmailProvider.instance) {
-            throw new Error('Not initialize');
+            logger.error('MailtrapEmailProvider not initialized');
+            return;
         }
 
         const mailtrapPayload: mailer.SendMailOptions = {
