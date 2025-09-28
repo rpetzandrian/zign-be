@@ -4,12 +4,14 @@ import MailtrapEmailProvider from "../lib/email_provider";
 import { EMAIL_CODE } from "../entity/constant/common";
 import fs from 'fs';
 import path from "path";
+import { Service } from "../base/service";
 
 
 
-export class EmailService {
+export class EmailService extends Service {
     private emailProvider: MailtrapEmailProvider;
     constructor(emailProvider: MailtrapEmailProvider) {
+        super()
         this.emailProvider = emailProvider
     }
 

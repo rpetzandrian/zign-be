@@ -1,0 +1,10 @@
+For Image I upload after this,.. do this!
+1. Fill the data using the provided input according to the predefined structure, keys, and table columns. Use only the provided keys and table columns. Do not add any new keys that are not present in the format.
+2. Each value in singular_data should only contain simple values (e.g., strings, numbers) and not lists, dictionaries, or nested values.
+3. The output should follow this JSON format:
+
+Predefined Structure : {
+        "nik": "1234567890",
+        "nama": "John Doe",
+        "jenis_kelamin": "Laki-Laki"
+    }

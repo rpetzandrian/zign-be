@@ -29,7 +29,7 @@ export const requestValidator = (schema: any) => (req: Request, res: Response, n
 
     return SchemeValidator({ query, params, body, files, headers }, schema)
         .then((validated: any): void => {
-            req.query = validated.query;
+            (req as any).modified_query = validated.query;
             req.params = validated.params;
             req.body = validated.body;
             return next();
