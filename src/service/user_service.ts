@@ -16,12 +16,6 @@ export class UserService extends Service {
         const user = await this.userRepository.findAll();
         return user
     }
-
-    // protected setRoutes(): void {
-    //     this._routes.get('/', (req, res) => {
-    //         return this.findAllUsers(req, res,)
-    //     })
-    // }
 }
 
 export default UserService

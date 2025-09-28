@@ -2,7 +2,7 @@ import { RegisterUserDto, UserTokenResponse } from "../entity/dto/auth";
 import { Service } from "../base/service";
 import UserRepository from "../repository/user_repository";
 import { BadRequestError } from "../base/http_error";
-import hashPassword from "../lib/hash";
+import { comparePassword, hashPassword } from "../lib/hash";
 import { EMAIL_CODE, EVENT_LIST, OTP_CODE_EXPIRED } from "../entity/constant/common";
 import { generateJwtToken } from "../lib/jwt";
 
@@ -64,8 +64,24 @@ export class AuthService extends Service {
         return { token, expires_in: Number(process.env.JWT_LIFETIME) };
     }
 
-    async resendOtpEmail(userId: string): Promise<void> {
+    public async resendOtpEmail(userId: string): Promise<void> {
         const user = await this.userRepository.findOneOrFail({ id: userId });  
         await this.sendOtpCodeToEmail(user.email, user.otp_code as string);
+    }
+
+    public async login(email: string, password: string): Promise<UserTokenResponse> {
+        const user = await this.userRepository.findOne({ email });
+        if (!user) {
+            throw new BadRequestError('Invalid email or password')
+        }
+
+        if (!await comparePassword(password, user.password as string)) {
+            throw new BadRequestError('Invalid email or password')
+        }
+
+        // Generate token
+        const token = generateJwtToken(user.id as string);
+
+        return { token, expires_in: Number(process.env.JWT_LIFETIME) };
     }
 }
