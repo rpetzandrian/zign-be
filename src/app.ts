@@ -39,7 +39,9 @@ class App extends BaseApp {
             MailtrapEmailProvider.initialize();
         }
 
-        AiProvider.initialize();
+        if (process.env.FEATURE_TURN_OFF_AI !== '1') {
+            AiProvider.initialize();
+        }
     }
 
     protected async initServices() {
