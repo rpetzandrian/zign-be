@@ -5,6 +5,8 @@ import { BadRequestError } from "../base/http_error";
 import { comparePassword, hashPassword } from "../lib/hash";
 import { EMAIL_CODE, EVENT_LIST, OTP_CODE_EXPIRED } from "../entity/constant/common";
 import { generateJwtToken } from "../lib/jwt";
+import { User } from "../entity/model/user";
+import { isAfter } from "date-fns";
 
 
 export class AuthService extends Service {
@@ -39,7 +41,7 @@ export class AuthService extends Service {
         });
     }
 
-    public async registerUser(data: RegisterUserDto): Promise<UserTokenResponse> {
+    public async registerUser(data: RegisterUserDto): Promise<void> {
         if (data.password !== data.confirm_password) {
             throw new BadRequestError('Password and confirm password must be same')
         }
@@ -57,11 +59,6 @@ export class AuthService extends Service {
 
         // Send OTP code to user email
         await this.sendOtpCodeToEmail(user.email, code);
-
-        // Generate token
-        const token = generateJwtToken(user.id as string);
-
-        return { token, expires_in: Number(process.env.JWT_LIFETIME) };
     }
 
     public async resendOtpEmail(userId: string): Promise<void> {
@@ -69,7 +66,7 @@ export class AuthService extends Service {
         await this.sendOtpCodeToEmail(user.email, user.otp_code as string);
     }
 
-    public async login(email: string, password: string): Promise<UserTokenResponse> {
+    public async login(email: string, password: string): Promise<void> {
         const user = await this.userRepository.findOne({ email });
         if (!user) {
             throw new BadRequestError('Invalid email or password')
@@ -79,9 +76,38 @@ export class AuthService extends Service {
             throw new BadRequestError('Invalid email or password')
         }
 
+        // Generate OTP code and expired
+        const { code, expired } = await this.generateOtpCodeAndExpired();
+
+        await this.userRepository.update({ id: user.id }, {
+            otp_code: code,
+            otp_code_expired: expired
+        });
+
+        // Send OTP code to user email
+        await this.sendOtpCodeToEmail(user.email, code);
+    }
+
+    private validateOtp(user: User, otp: string) {
+        if (user.otp_code !== otp) {
+            throw new BadRequestError('OTP mismatch', 'OTP_MISMATCH');
+        }
+
+        if (isAfter(new Date(), user.otp_code_expired as Date)) {
+            throw new BadRequestError('OTP expired', 'OTP_EXPIRED');
+        }
+    }
+
+    public async verifyOTP(otp: string, email: string):  Promise<UserTokenResponse> {
+        const user = await this.userRepository.findOneOrFail({ email }, { attributes: ['id', 'otp_code', 'otp_code_expired', 'is_email_verified'] });
+        this.validateOtp(user, otp);
+
+        if (!user.is_email_verified) {
+            await this.userRepository.update({ id: user.id }, { is_email_verified: true });
+        }
+
         // Generate token
         const token = generateJwtToken(user.id as string);
-
         return { token, expires_in: Number(process.env.JWT_LIFETIME) };
     }
 }

@@ -14,6 +14,9 @@ import { SendEmailSubscriber } from './subsriber/send_email_subscriber';
 import { AiProvider } from './lib/ai_provider';
 import { VerificationService } from './service/verification_service';
 import { VerificationController } from './controller/verification_controller';
+import S3Provider from './lib/s3-provider';
+import { FileService } from './service/file_service';
+import FileRepository from './repository/file_repository';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
@@ -42,6 +45,8 @@ class App extends BaseApp {
         if (process.env.FEATURE_TURN_OFF_AI !== '1') {
             AiProvider.initialize();
         }
+
+        S3Provider.initialize();
     }
 
     protected async initServices() {
@@ -53,20 +58,23 @@ class App extends BaseApp {
         const emailProvider = new MailtrapEmailProvider()
         const eventProvider = new EventProvider();
         const aiProvider = new AiProvider();
+        const s3Provider = new S3Provider();
 
         /** Initialize repositories */
         const userRepository = new UserRepository(prisma);
+        const fileRepository = new FileRepository(prisma);
 
         /** Initialize services */
         const userService = new UserService(userRepository);
         const emailService = new EmailService(emailProvider);
         const authService = new AuthService(userRepository);
-        const verificationService = new VerificationService(userRepository, aiProvider);
+        const fileService = new FileService(fileRepository, s3Provider);
+        const verificationService = new VerificationService(userRepository, aiProvider, fileService);
 
         /** Initialize controllers */
         const authController = new AuthController(authService);
         const userController = new UserController(userService);
-        const verificationController = new VerificationController(verificationService);
+        const verificationController = new VerificationController(verificationService, fileService);
 
         /** Initialize event subscribers */
         const sendEmailSubscriber = new SendEmailSubscriber(emailService);

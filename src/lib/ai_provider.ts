@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import path from "path";
 import logger from "./logger";
 import { InternalServerError } from "../base/http_error";
+import { Files } from "../entity/constant/file";
 
 export class AiProvider {
     static instance: OpenAI | null = null;
@@ -16,7 +17,7 @@ export class AiProvider {
         }
     }
 
-    public async doOcr(file: any) {
+    public async doOcr(file: Files) {
         if (!AiProvider.instance) {
             throw new Error('AiProvider not initialized');
         }
@@ -48,6 +49,7 @@ export class AiProvider {
 
             return resp.choices[0].message.content;
         } catch (error) {
+            console.log(error)
             logger.error('Error ocr process', error);
             throw new InternalServerError('Error ocr process');
         }

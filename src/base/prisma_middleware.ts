@@ -1,5 +1,4 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { DynamicClientExtensionThis, InternalArgs } from "@prisma/client/runtime/library";
 
 /**
  * Creates an extended Prisma client with soft-delete functionality.
@@ -39,7 +38,7 @@ export const getPrismaClientWithSoftDelete = (
                 if (args && 'where' in args) {
                 args = {
                     ...args,
-                    where: { ...args.where, deleted_at: null }
+                    where: { ...(args as any).where, deleted_at: null }
                 };
                 } else {
                 args = {

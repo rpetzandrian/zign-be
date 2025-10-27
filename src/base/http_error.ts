@@ -41,11 +41,14 @@ export class HttpError extends Error {
 
     public toErrorResponse(): ErrorResponse {
         return {
-            error_name: this.name,
-            error_code: this.code,
-            error_message: this.message,
-            error_data: this.data
-        };
+            success: false,
+            message: this.message,
+            data: this.data,
+            error: {
+                code: this.code
+            }
+        }
+        ;
     }
 
     public get isServerError(): boolean {

@@ -78,6 +78,13 @@ export class BaseRepository<T, Entity> {
         }) as Entity;
     }
 
+    public async createMany(data: Partial<Entity>[]): Promise<Entity[]> {
+        return (this.model as any).createMany({
+            data,
+            skipDuplicates: true
+        }) as Entity[];
+    }
+
     public async update(where: Partial<Entity>, data: Partial<Entity>): Promise<Entity> {
         return (this.model as any).update({
             where,

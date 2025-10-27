@@ -21,8 +21,10 @@ export interface ICustomError {
 }
 
 export interface ErrorResponse {
-    error_name: string;
-    error_message: string;
-    error_code: string;
-    error_data?: any;
+    success: boolean;
+    message: string;
+    data?: any;
+    error?: {
+        code: string;
+    };
 }
