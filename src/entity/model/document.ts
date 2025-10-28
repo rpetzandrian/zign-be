@@ -6,5 +6,5 @@ export interface Document extends BaseModel {
     original_file_id: string;
     sign_id: string;
     status: string;
-    metadata: Record<string, any>
+    metadata: string;
 }

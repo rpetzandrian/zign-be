@@ -45,3 +45,7 @@ export interface GetObjectResponse {
     LastModified?: Date;
     ETag: string;
 }
+
+export enum FILE_MIMETYPE {
+    PDF = 'application/pdf'
+}

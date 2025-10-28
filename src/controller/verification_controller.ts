@@ -4,6 +4,8 @@ import { VerificationService } from "../service/verification_service";
 import UploadMiddleware from "../middleware/upload_middleware";
 import { authMiddleware } from "../middleware/auth_middleware";
 import { FileService } from "../service/file_service";
+import { requestValidator } from "../middleware/request_middleware";
+import { UPLOAD_CARD } from "../entity/validation/verification";
 
 
 export class VerificationController extends Controller {
@@ -26,7 +28,7 @@ export class VerificationController extends Controller {
 
 
     protected setRoutes(): void {
-        this._routes.post(`/v1/${this.path}/ocr`, authMiddleware, UploadMiddleware(), (req, res) => {
+        this._routes.post(`/v1/${this.path}/ocr`, authMiddleware, UploadMiddleware(), requestValidator(UPLOAD_CARD), (req, res) => {
             return this.verifyUser(req, res)
         })
     }

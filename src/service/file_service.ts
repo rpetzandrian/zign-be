@@ -122,38 +122,6 @@ export class FileService extends Service {
         };
     }
 
-    async signPdf() {
-        try {
-            const docs = await this.getFile('11f03321-964b-45dd-866b-eb0e47045093');
-            const sign = await this.getFile('43b58063-0f90-4e4b-bb81-d9e37cff7df4')
-            const pdfDocs = await PDFDocument.load(docs.Body);
-    
-            const signImage = await pdfDocs.embedPng(sign.Body);
-            const pages = pdfDocs.getPages();
-            const firstPage = pages[0];
-            firstPage.drawImage(signImage, {
-                x: 100,
-                y: 100,
-                width: 100,
-                height: 100,
-            });
-    
-            const pdfBytes = await pdfDocs.save();
-            const pdfBuffer = Buffer.from(pdfBytes);
-            const pdfFilename = `${generateUuid()}`;
-
-            return {
-                buffer: pdfBuffer,
-                mime_type: 'application/pdf',
-                file_size: 7478,
-                file_name: pdfFilename,
-            }
-        } catch (error) {
-            console.log(error);
-            throw error
-        }
-    }
-
     async getFile(id: string) {
         const file = await this.fileRepository.findOne({ id });
         if (!file) {
