@@ -33,7 +33,7 @@ export class VerificationController extends Controller {
     // }
 
     protected setRoutes(): void {
-        this._routes.post(`/v1/${this.path}/ocr`, UploadMiddleware(), (req, res) => {
+        this._routes.post(`/v1/${this.path}/ocr`, authMiddleware, UploadMiddleware(), (req, res) => {
             return this.verifyUser(req, res)
         })
         // this._routes.get(`/v1/${this.path}/preview/:file_id`, (req, res) => {
