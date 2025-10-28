@@ -17,6 +17,9 @@ import { VerificationController } from './controller/verification_controller';
 import S3Provider from './lib/s3-provider';
 import { FileService } from './service/file_service';
 import FileRepository from './repository/file_repository';
+import { DocumentService } from './service/document_service';
+import { DocumentController } from './controller/document_controller';
+import DocumentRepository from './repository/document_repository';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
@@ -63,6 +66,7 @@ class App extends BaseApp {
         /** Initialize repositories */
         const userRepository = new UserRepository(prisma);
         const fileRepository = new FileRepository(prisma);
+        const documentRepository = new DocumentRepository(prisma);
 
         /** Initialize services */
         const userService = new UserService(userRepository);
@@ -70,11 +74,13 @@ class App extends BaseApp {
         const authService = new AuthService(userRepository);
         const fileService = new FileService(fileRepository, s3Provider);
         const verificationService = new VerificationService(userRepository, aiProvider, fileService);
+        const documentService = new DocumentService(fileService, documentRepository);
 
         /** Initialize controllers */
         const authController = new AuthController(authService);
         const userController = new UserController(userService);
         const verificationController = new VerificationController(verificationService, fileService);
+        const documentController = new DocumentController(documentService);
 
         /** Initialize event subscribers */
         const sendEmailSubscriber = new SendEmailSubscriber(emailService);
@@ -83,6 +89,7 @@ class App extends BaseApp {
         this._app.use('/', authController._routes)
         this._app.use('/', userController._routes)
         this._app.use('/', verificationController._routes)
+        this._app.use('/', documentController._routes)
 
         /** Register event subscribers */
         eventProvider.subscribe(sendEmailSubscriber);

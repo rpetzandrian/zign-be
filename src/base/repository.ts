@@ -5,6 +5,8 @@ import { BadRequestError } from "./http_error";
 export interface Opts {
     attributes?: string[];
     sort?: string;
+    page?: number;
+    limit?: number;
 }
 
 interface Order {

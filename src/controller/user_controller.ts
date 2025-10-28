@@ -6,7 +6,7 @@ import UserService from "../service/user_service";
 export class UserController extends Controller {
     private userService: UserService;
     constructor(userService: UserService) {
-        super('/users')
+        super('/user')
         this.userService = userService
     }
 

@@ -19,24 +19,18 @@ export class VerificationService extends Service {
     }
 
     public async verifyUser(data: Files, userId: string) {
-        await this.fileService.upload([data], {
-            bucket_name: 'zign-assets',
-            folder: 'verification'
-        });
-        // const user = await this.userRepository.findOneOrFail({ id: userId });
-        // if (user.is_verified) {
-        //     throw new BadRequestError('user already verified')
-        // }
+        const user = await this.userRepository.findOneOrFail({ id: userId });
+        if (user.is_verified) {
+            throw new BadRequestError('user already verified', 'USER_ALREADY_VERIFIED');
+        }
 
-        // const ocrResult = await this.aiProvider.doOcr(data);
-        // const parsedResult = JSON.parse(ocrResult as string);
+        const ocrResult = await this.aiProvider.doOcr(data);
+        const parsedResult = JSON.parse(ocrResult as string);
 
-        // console.log(parsedResult)
-
-        // await this.userRepository.update({ id: user.id }, {
-        //     is_verified: true,
-        //     card_no: parsedResult.nik,
-        //     name: parsedResult.nama
-        // })
+        await this.userRepository.update({ id: user.id }, {
+            is_verified: true,
+            card_no: parsedResult.nik,
+            name: parsedResult.nama
+        })
     }
 }

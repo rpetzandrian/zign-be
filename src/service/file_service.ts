@@ -1,13 +1,12 @@
 import FileRepository from "../repository/file_repository";
 import { Service } from "../base/service";
 import S3Provider from "../lib/s3-provider";
-import { Files, GetObjectResponse, S3UploadOptions } from "../entity/constant/file";
+import { Files, S3UploadOptions } from "../entity/constant/file";
 import { generateChecksum, generateUuid } from "../lib/helpers";
 import { join } from "path";
-import { Readable } from "stream";
-import { File } from "@prisma/client";
 import { NotFoundError } from "../base/http_error";
 import { PDFDocument } from "pdf-lib";
+import { File } from "../entity/model/file";
 
 
 export class FileService extends Service {
@@ -19,8 +18,7 @@ export class FileService extends Service {
         this.s3Provider = s3Provider;
     }
 
-    public async upload(files: Files[], options: S3UploadOptions): Promise<any> {
-        console.log('called')
+    public async uploadPublic(files: Files[], options: S3UploadOptions): Promise<Partial<File>[]> {
         await this.getBucket(options.bucket_name);
         const processUploads = files.map(file => {
             const fileKey = generateUuid();
@@ -36,7 +34,6 @@ export class FileService extends Service {
                 ContentType: file.mimetype,
                 ACL: 'public-read',
             }).then((res) => {
-                console.log(res)
                 return {
                     id: fileKey,
                     key,
@@ -55,7 +52,43 @@ export class FileService extends Service {
 
         
         const resultUploads = await Promise.all(processUploads);
-        console.log(resultUploads)
+        await this.fileRepository.createMany(resultUploads);
+        return resultUploads;
+    }
+
+    public async upload(files: Files[], options: S3UploadOptions): Promise<Partial<File>[]> {
+        await this.getBucket(options.bucket_name);
+        const processUploads = files.map(file => {
+            const fileKey = generateUuid();
+            const extension = file.mimetype.split('/')[1];
+
+            const prefix = options.folder;
+            const key = `${join(prefix, fileKey)}.${extension}`;
+
+            return this.s3Provider.upload({
+                Bucket: options.bucket_name,
+                Key: key,
+                Body: file.buffer,
+                ContentType: file.mimetype
+            }).then((res) => {
+                return {
+                    id: fileKey,
+                    key,
+                    bucket_name: options.bucket_name,
+                    file_url: res.Location,
+                    file_name: file.originalname,
+                    file_size: file.size,
+                    mime_type: file.mimetype,
+                    checksum: generateChecksum(file.buffer)
+                }
+            })
+            .catch((err) => {
+                throw err;
+            })
+        })
+
+        
+        const resultUploads = await Promise.all(processUploads);
         await this.fileRepository.createMany(resultUploads);
         return resultUploads;
     }
@@ -64,13 +97,12 @@ export class FileService extends Service {
         try {
             return await this.s3Provider.getBucket(bucketName);
         } catch (error: any) {
-            console.log(error)
             throw error;
         }
     }
 
-    public async downloadPreview(payload: Partial<File>, userId?: number): Promise<any> {
-        const file = await this.fileRepository.findOne(payload);
+    public async downloadPreview(id: string): Promise<any> {
+        const file = await this.fileRepository.findOne({ id });
         if (!file) {
             throw new NotFoundError('File with the specified id not found', 'FILE_NOT_FOUND');
         }
@@ -83,8 +115,6 @@ export class FileService extends Service {
             bucket: file.bucket_name,
             key: file.key
         });
-
-        console.log(data)
 
         return {
             ...file,

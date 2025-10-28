@@ -28,35 +28,38 @@ model User {
 }
 
 model File {
-  id          String     @id @default(uuid()) @db.VarChar(60)
-  key         String     @db.VarChar(255)
-  bucket_name String     @db.VarChar(100)
-  checksum    String     @db.VarChar(255)
-  file_url    String     @db.VarChar(255)
-  file_name   String     @db.VarChar(255)
-  file_size   Int        @db.Integer
-  mime_type   String     @db.VarChar(100)
-  created_at  DateTime   @default(now()) @db.Timestamp(6)
-  updated_at  DateTime   @default(now()) @updatedAt @db.Timestamp(6)
-  deleted_at  DateTime?  @db.Timestamp(6)
-  Document    Document[]
-  Sign        Sign[]
+  id               String     @id @default(uuid()) @db.VarChar(60)
+  key              String     @db.VarChar(255)
+  bucket_name      String     @db.VarChar(100)
+  checksum         String     @db.VarChar(255)
+  file_url         String     @db.VarChar(255)
+  file_name        String     @db.VarChar(255)
+  file_size        Int        @db.Integer
+  mime_type        String     @db.VarChar(100)
+  created_at       DateTime   @default(now()) @db.Timestamp(6)
+  updated_at       DateTime   @default(now()) @updatedAt @db.Timestamp(6)
+  deleted_at       DateTime?  @db.Timestamp(6)
+  Sign             Sign[]
+  SignedDocument   Document[] @relation(name: "signed_file")
+  OriginalDocument Document[] @relation(name: "original_file")
 
   @@unique([key])
   @@map("files")
 }
 
 model Document {
-  id         String    @id @default(uuid()) @db.VarChar(60)
-  user_id    String    @db.VarChar(60)
-  file_id    String    @db.VarChar(60)
-  sign_id    String    @db.VarChar(60)
-  status     String    @db.VarChar(20)
-  metadata   Json?     @db.Json
-  created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime  @default(now()) @updatedAt @db.Timestamp(6)
-  deleted_at DateTime? @db.Timestamp(6)
-  File       File?     @relation(fields: [file_id], references: [id])
+  id               String    @id @default(uuid()) @db.VarChar(60)
+  user_id          String    @db.VarChar(60)
+  signed_file_id   String?   @db.VarChar(60)
+  original_file_id String    @db.VarChar(60)
+  sign_id          String?   @db.VarChar(60)
+  status           String    @db.VarChar(20)
+  metadata         Json?     @db.Json
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deleted_at       DateTime? @db.Timestamp(6)
+  signed_file      File?     @relation(fields: [signed_file_id], references: [id], name: "signed_file")
+  original_file    File?     @relation(fields: [original_file_id], references: [id], name: "original_file")
 
   @@map("documents")
 }
