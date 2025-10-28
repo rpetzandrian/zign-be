@@ -8,12 +8,10 @@ import { FileService } from "../service/file_service";
 
 export class VerificationController extends Controller {
     private verificationService: VerificationService;
-    // private fileService: FileService;
 
     constructor(verificationService: VerificationService, fileService: FileService) {
         super('verification')
         this.verificationService = verificationService
-        // this.fileService = fileService
     }
 
     public async verifyUser(req: Request, res: Response): Promise<any> {
@@ -26,18 +24,10 @@ export class VerificationController extends Controller {
         })
     }
 
-    // public async downloadPreview(req: Request, res: Response) {
-    //     const { file_id } = req.params
-    //     const file = await this.fileService.signPdf()
-    //     res.set({}).end(file.buffer, 'binary');
-    // }
 
     protected setRoutes(): void {
         this._routes.post(`/v1/${this.path}/ocr`, authMiddleware, UploadMiddleware(), (req, res) => {
             return this.verifyUser(req, res)
         })
-        // this._routes.get(`/v1/${this.path}/preview/:file_id`, (req, res) => {
-        //     return this.downloadPreview(req, res)
-        // })
     }
 }
