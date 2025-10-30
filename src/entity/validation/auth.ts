@@ -21,3 +21,16 @@ export const LOGIN_SCHEMA = Joi.object({
         .required(),
     })
 })
+
+export const VERIFY_OTP_SCHEMA = Joi.object({
+    body: Joi.object({
+        otp: Joi.string().required(),
+        email: Joi.string().email().required(),
+    })
+})
+
+export const RESEND_OTP_SCHEMA = Joi.object({
+    body: Joi.object({
+        email: Joi.string().email().required(),
+    })
+})

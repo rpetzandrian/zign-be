@@ -5,6 +5,8 @@ import { BadRequestError } from "./http_error";
 export interface Opts {
     attributes?: string[];
     sort?: string;
+    page?: number;
+    limit?: number;
 }
 
 interface Order {
@@ -76,6 +78,13 @@ export class BaseRepository<T, Entity> {
         return (this.model as any).create({
             data,
         }) as Entity;
+    }
+
+    public async createMany(data: Partial<Entity>[]): Promise<Entity[]> {
+        return (this.model as any).createMany({
+            data,
+            skipDuplicates: true
+        }) as Entity[];
     }
 
     public async update(where: Partial<Entity>, data: Partial<Entity>): Promise<Entity> {
