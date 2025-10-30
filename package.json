@@ -5,6 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "nodemon",
+    "dev": "nodemon src/app.ts",
     "clean-install": "rm -rf node_modules package-lock.json && npm install",
     "build": "rm -rf ./build && ./node_modules/typescript/bin/tsc"
   },

@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import UserRepository from './repository/user_repository';
 import { UserService } from './service/user_service';
 import express from 'express';
 import BaseApp from './base/app';
@@ -14,6 +13,7 @@ import { SendEmailSubscriber } from './subsriber/send_email_subscriber';
 import { AiProvider } from './lib/ai_provider';
 import { VerificationService } from './service/verification_service';
 import { VerificationController } from './controller/verification_controller';
+import UserRepository from './repository/user_repository';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
