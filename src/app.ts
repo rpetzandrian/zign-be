@@ -22,6 +22,7 @@ import DocumentRepository from './repository/document_repository';
 import SignRepository from './repository/sign_repository';
 import { SignService } from './service/sign_service';
 import { SignController } from './controller/sign_controller';
+import UserRepository from './repository/user_repository';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
