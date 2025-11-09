@@ -66,7 +66,6 @@ export class DocumentService extends Service {
             const updatedDocs = await this.documentRepository.findOneOrFail({ id: payload.document_id });
             return updatedDocs;
         } catch (error) {
-            console.log(error);
             throw error
         }
     }

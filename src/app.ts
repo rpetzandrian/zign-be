@@ -23,6 +23,8 @@ import SignRepository from './repository/sign_repository';
 import { SignService } from './service/sign_service';
 import { SignController } from './controller/sign_controller';
 import UserRepository from './repository/user_repository';
+import FileOwnerRepository from './repository/file_owner_repository';
+import FacePlusProvider from './lib/faceplus_provider';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
@@ -65,19 +67,25 @@ class App extends BaseApp {
         const eventProvider = new EventProvider();
         const aiProvider = new AiProvider();
         const s3Provider = new S3Provider();
+        const facePlusProvider = new FacePlusProvider({
+            apiKey: process.env.FACEPLUS_API_KEY!,
+            apiSecret: process.env.FACEPLUS_API_SECRET!,
+            apiUrl: process.env.FACEPLUS_API_URL!,
+        });
 
         /** Initialize repositories */
         const userRepository = new UserRepository(prisma);
         const fileRepository = new FileRepository(prisma);
         const documentRepository = new DocumentRepository(prisma);
         const signRepository = new SignRepository(prisma);
+        const fileOwnerRepository = new FileOwnerRepository(prisma);
 
         /** Initialize services */
         const userService = new UserService(userRepository);
         const emailService = new EmailService(emailProvider);
         const authService = new AuthService(userRepository);
-        const fileService = new FileService(fileRepository, s3Provider);
-        const verificationService = new VerificationService(userRepository, aiProvider, fileService);
+        const fileService = new FileService(fileRepository, s3Provider, fileOwnerRepository);
+        const verificationService = new VerificationService(userRepository, aiProvider, fileService, facePlusProvider, fileOwnerRepository);
         const documentService = new DocumentService(fileService, documentRepository, signRepository);
         const signService = new SignService(fileService, signRepository);
 

@@ -49,7 +49,6 @@ export class AiProvider {
 
             return resp.choices[0].message.content;
         } catch (error) {
-            console.log(error)
             logger.error('Error ocr process', error);
             throw new InternalServerError('Error ocr process');
         }
