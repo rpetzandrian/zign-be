@@ -18,19 +18,35 @@ export class VerificationService extends Service {
         this.fileService = fileService
     }
 
-    public async verifyUser(data: Files, userId: string) {
+    public async verifyUser(data: Files[], userId: string) {
         const user = await this.userRepository.findOneOrFail({ id: userId });
         if (user.is_verified) {
             throw new BadRequestError('user already verified', 'USER_ALREADY_VERIFIED');
         }
 
-        const ocrResult = await this.aiProvider.doOcr(data);
+        const identityCardFile = data.find(file => file.originalname.includes('card_identity'));
+        if(!identityCardFile) {
+            throw new BadRequestError('identity card file is required', 'IDENTITY_CARD_FILE_REQUIRED');
+        }
+
+        const ocrResult = await this.aiProvider.doOcr(identityCardFile);
         const parsedResult = JSON.parse(ocrResult as string);
+
+        const faceFile = data.find(file => file.originalname.includes('face_identity'));
+        if(!faceFile) {
+            throw new BadRequestError('face file is required', 'FACE_FILE_REQUIRED');
+        }
+
+        await this.fileService.uploadPublic([faceFile], {
+            bucket_name: String(process.env.FILE_BUCKET),
+            folder: user.id as string,
+            filename: `${user.id}-${faceFile.originalname}`
+        }, user.id as string, 'face-identity');
 
         await this.userRepository.update({ id: user.id }, {
             is_verified: true,
             card_no: parsedResult.nik,
             name: parsedResult.nama
-        })
+        });
     }
 }

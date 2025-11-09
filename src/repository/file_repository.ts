@@ -4,7 +4,7 @@ import { File } from "../entity/model/file";
 
 export class FileRepository extends BaseRepository<Prisma.FileDelegate, File> {
     public constructor(client: PrismaClient) {
-        super('file', client);
+        super('File', client);
     }
 }
 

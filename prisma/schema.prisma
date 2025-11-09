@@ -27,6 +27,18 @@ model User {
   @@map("users")
 }
 
+model FileOwner {
+  id         String    @id @default(uuid()) @db.VarChar(60)
+  user_id    String    @db.VarChar(60)
+  file_id    String    @db.VarChar(60)
+  type       String    @db.VarChar(20)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+
+  @@map("file_owners")
+}
+
 model File {
   id               String     @id @default(uuid()) @db.VarChar(60)
   key              String     @db.VarChar(255)

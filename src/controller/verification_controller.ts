@@ -19,7 +19,7 @@ export class VerificationController extends Controller {
     public async verifyUser(req: Request, res: Response): Promise<any> {
         const data = req.files as Express.Multer.File[]
         const context = (req as any).context as { user_id: string }
-        await this.verificationService.verifyUser(data[0], context.user_id)
+        await this.verificationService.verifyUser(data, context.user_id)
         res.send({
             success: true,
             message: 'Success verify ktp!'

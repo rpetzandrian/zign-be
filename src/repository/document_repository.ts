@@ -4,7 +4,7 @@ import { Document } from "../entity/model/document";
 
 export class DocumentRepository extends BaseRepository<Prisma.DocumentDelegate, Document> {
     public constructor(client: PrismaClient) {
-        super('document', client);
+        super('Document', client);
     }
 }
 

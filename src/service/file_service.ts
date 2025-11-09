@@ -7,18 +7,22 @@ import { join } from "path";
 import { NotFoundError } from "../base/http_error";
 import { PDFDocument } from "pdf-lib";
 import { File } from "../entity/model/file";
+import FileOwnerRepository from "../repository/file_owner_repository";
+import { FileOwner } from "../entity/model/file_owner";
 
 
 export class FileService extends Service {
     private fileRepository: FileRepository;
     private s3Provider: S3Provider;
-    public constructor(fileRepository: FileRepository, s3Provider: S3Provider) {
+    private fileOwnerRepository: FileOwnerRepository;
+    public constructor(fileRepository: FileRepository, s3Provider: S3Provider, fileOwnerRepository: FileOwnerRepository) {
         super();
         this.fileRepository = fileRepository;
         this.s3Provider = s3Provider;
+        this.fileOwnerRepository = fileOwnerRepository;
     }
 
-    public async uploadPublic(files: Files[], options: S3UploadOptions): Promise<Partial<File>[]> {
+    public async uploadPublic(files: Files[], options: S3UploadOptions, userId?: string, type?: string): Promise<Partial<File>[]> {
         await this.getBucket(options.bucket_name);
         const processUploads = files.map(file => {
             const fileKey = generateUuid();
@@ -53,10 +57,25 @@ export class FileService extends Service {
         
         const resultUploads = await Promise.all(processUploads);
         await this.fileRepository.createMany(resultUploads);
+
+        try {
+            if(userId) {
+                const data: Partial<FileOwner>[] = resultUploads.map(file => ({
+                    id: generateUuid(),
+                    file_id: file.id,
+                    user_id: userId,
+                    type: type || 'file',
+                }))
+                await this.fileOwnerRepository.createMany(data);
+            }
+        } catch (error) {
+            throw error;
+        }
+
         return resultUploads;
     }
 
-    public async upload(files: Files[], options: S3UploadOptions): Promise<Partial<File>[]> {
+    public async upload(files: Files[], options: S3UploadOptions, userId?: string, type?: string): Promise<Partial<File>[]> {
         await this.getBucket(options.bucket_name);
         const processUploads = files.map(file => {
             const fileKey = generateUuid();
@@ -90,6 +109,15 @@ export class FileService extends Service {
         
         const resultUploads = await Promise.all(processUploads);
         await this.fileRepository.createMany(resultUploads);
+
+        if(userId) {
+            await this.fileOwnerRepository.createMany(resultUploads.map(file => ({
+                file_id: file.id,
+                user_id: userId,
+                type: type || 'file',
+            })));
+        }
+
         return resultUploads;
     }
 
