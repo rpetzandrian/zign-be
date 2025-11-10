@@ -1,4 +1,4 @@
-import { RegisterUserDto, UserTokenResponse } from "../entity/dto/auth";
+import { RegisterUserDto, ResetPasswordDto, UserTokenResponse } from "../entity/dto/auth";
 import { Service } from "../base/service";
 import UserRepository from "../repository/user_repository";
 import { BadRequestError } from "../base/http_error";
@@ -7,6 +7,7 @@ import { EMAIL_CODE, EVENT_LIST, OTP_CODE_EXPIRED } from "../entity/constant/com
 import { generateJwtToken } from "../lib/jwt";
 import { User } from "../entity/model/user";
 import { isAfter } from "date-fns";
+import { string } from "joi";
 
 
 export class AuthService extends Service {
@@ -107,7 +108,49 @@ export class AuthService extends Service {
         }
 
         // Generate token
-        const token = generateJwtToken(user.id as string);
+        const token = generateJwtToken(user.id as string, process.env.JWT_LIFETIME as string);
         return { token, expires_in: Number(process.env.JWT_LIFETIME) };
+    }
+
+    public async forgotPassword(email: string): Promise<{ token: string }> {
+        const user = await this.userRepository.findOne({ email: email });
+        if (!user) {
+            throw new BadRequestError('User not found or email is invalid.');
+        }
+        const { code, expired } = await this.generateOtpCodeAndExpired();
+        const resetToken = generateJwtToken(user.id as string, '1h');
+
+        await this.userRepository.update({ id: user.id }, {
+            otp_code: code,
+            otp_code_expired: expired,
+            reset_token: resetToken
+        });
+        
+        await this.event.publish(EVENT_LIST.SEND_EMAIL,  {
+            code: EMAIL_CODE.FORGOT_PASSWORD, 
+            to: [user.email],
+            parameters: {
+                otp: code,
+                token: resetToken
+            }
+        });
+        return {token: resetToken};
+    }
+    public async resetPassword(data: ResetPasswordDto): Promise<void> {
+        const { password, confirm_password, token, otp_code } = data;
+        if (password !== confirm_password) {
+            throw new BadRequestError('Password and confirm password must be same');
+        }
+        const user = await this.userRepository.findOneOrFail({ reset_token: token }, 
+            { attributes: ['id', 'otp_code', 'otp_code_expired', 'password'] }
+        );
+        this.validateOtp(user, otp_code);
+        const newHashedPassword = await hashPassword(password);
+        await this.userRepository.update({ id: user.id }, {
+            password: newHashedPassword,
+            reset_token: null,
+            otp_code: null,
+            otp_code_expired: null
+        });
     }
 }

@@ -5,7 +5,8 @@ export const DEFAULT_TIMEOUT = {
 export const OTP_CODE_EXPIRED = 10;
 
 export const EMAIL_CODE = {
-    OTP: 'otp_email'
+    OTP: 'otp_email',
+    FORGOT_PASSWORD: 'forgot_password'
 }
 
 export const EVENT_LIST = {

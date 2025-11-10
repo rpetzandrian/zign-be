@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 
-export function generateJwtToken(userId: string): string {
+export function generateJwtToken(userId: string, p0: string): string {
     const token = jwt.sign({ user_id: userId }, process.env.JWT_SECRET as string, {
         expiresIn: Number(process.env.JWT_LIFETIME)
     });

@@ -9,6 +9,7 @@ export interface User extends BaseModel {
     is_verified: boolean;
     is_face_recognized: boolean;
     profile_picture?: string;
-    otp_code?: string;
-    otp_code_expired?: Date;
+    otp_code: string | null;
+    otp_code_expired: Date | null;
+    reset_token: string | null;
 }

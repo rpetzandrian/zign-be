@@ -3,7 +3,7 @@ import Controller from "../base/controller";
 import { AuthService } from "../service/auth_service";
 import { authMiddleware } from "../middleware/auth_middleware";
 import { requestValidator } from "../middleware/request_middleware";
-import { LOGIN_SCHEMA, REGISTER_SCHEMA, RESEND_OTP_SCHEMA, VERIFY_OTP_SCHEMA } from "../entity/validation/auth";
+import { LOGIN_SCHEMA, REGISTER_SCHEMA, RESEND_OTP_SCHEMA, VERIFY_OTP_SCHEMA , FORGOT_PASSWORD_SCHEMA, RESET_PASSWORD_SCHEMA} from "../entity/validation/auth";
 
 
 export class AuthController extends Controller {
@@ -46,6 +46,25 @@ export class AuthController extends Controller {
         });
     }
 
+    public async forgotPassword(req: Request, res: Response) {
+        const { token } = await this.authService.forgotPassword(req.body); // Menggunakan req.body untuk DTO
+        return res.send({
+            status: "success", // Menggunakan status dan message sesuai permintaan Anda
+            message: "Password reset token has been sent to your email",
+            data: {
+                token: token
+            }
+        });
+    }
+
+    public async resetPassword(req: Request, res: Response) {
+        await this.authService.resetPassword(req.body);
+        return res.send({
+            status: "success", // Menggunakan status dan message sesuai permintaan Anda
+            message: "Password has been reset successfully"
+        });
+    }
+
     protected setRoutes(): void {
         this._routes.post(`/v1/${this.path}/register`, requestValidator(REGISTER_SCHEMA), (req, res) => {
             return this.registerUser(req, res)
@@ -61,6 +80,14 @@ export class AuthController extends Controller {
         
         this._routes.post(`/v1/${this.path}/verify-otp`, requestValidator(VERIFY_OTP_SCHEMA), (req, res) => {
             return this.verifyOTP(req, res)
+        });
+
+        this._routes.post(`/v1/${this.path}/forgot-password`, requestValidator(FORGOT_PASSWORD_SCHEMA), (req, res) => {
+            return this.forgotPassword(req, res)
+        });
+
+        this._routes.post(`/v1/${this.path}/reset-password`, requestValidator(RESET_PASSWORD_SCHEMA), (req, res) => {
+            return this.resetPassword(req, res)
         });
     }
 }
