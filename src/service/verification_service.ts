@@ -79,7 +79,12 @@ export class VerificationService extends Service {
         const faceToken1 = faceIdentity.Body.toString('base64');
         const faceToken2 = file.buffer.toString('base64');
 
-        const result = await this.facePlusProvider.compareFaces(faceToken1, faceToken2);
+        let result: any = { confidence: 85 };
+        if (!process.env.FEATURE_TURN_OFF_FACE_RECOGNITION) {
+            result = await this.facePlusProvider.compareFaces(faceToken1, faceToken2);
+        }
+
+        
         if(result.confidence < Number(process.env.FACE_RECOGNITION_THRESHOLD)) {
             throw new BadRequestError('face not match', 'FACE_NOT_MATCH');
         }
