@@ -22,6 +22,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 COPY --from=build /app/build ./
+COPY --from=build /app/prisma ./prisma/
 
 EXPOSE 8080
 CMD ["node", "."]
