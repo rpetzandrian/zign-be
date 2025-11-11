@@ -7,7 +7,7 @@ import App from './src/app';
     env.config();
 
     /** parse envs */
-    const port = Number(process.env.APP_PORT);
+    const port = Number(process.env.APP_PORT) || 3000;
 
     /** instantiate and start server  */
     const app = new App({ port });
