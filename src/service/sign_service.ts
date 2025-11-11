@@ -17,8 +17,8 @@ export class SignService extends Service {
 
     async uploadSignSpecimen(file: Files, userId: string): Promise<Sign> {
         const options = {
-            bucket_name: String(process.env.SIGN_BUCKET),
-            folder: userId,
+            bucket_name: String(process.env.IMAGE_BUCKET),
+            folder: `sign-specimen/${userId}`,
         }
         const [result] = await this.fileService.upload([file], options);
         const sign = await this.signRepository.create({

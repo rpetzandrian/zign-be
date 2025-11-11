@@ -44,9 +44,9 @@ export class VerificationService extends Service {
         }
 
         await this.fileService.uploadPublic([faceFile], {
-            bucket_name: String(process.env.FILE_BUCKET),
-            folder: user.id as string,
-            filename: `${user.id}-${faceFile.originalname}`
+            bucket_name: String(process.env.IMAGE_BUCKET),
+            folder: `face-identity/${user.id}`,
+            filename: `${faceFile.originalname}`
         }, user.id as string, 'face-identity');
 
         await this.userRepository.update({ id: user.id }, {
@@ -77,9 +77,9 @@ export class VerificationService extends Service {
         }
 
         const profilePicture = await this.fileService.uploadPublic([file], {
-            bucket_name: String(process.env.FILE_BUCKET),
-            folder: user.id as string,
-            filename: `${user.id}-${file.originalname}`
+            bucket_name: String(process.env.IMAGE_BUCKET),
+            folder: `profile-picture/${user.id}`,
+            filename: `${file.originalname}`
         }, user.id as string, 'profile-picture');
 
         await this.userRepository.update({ id: user.id }, {
