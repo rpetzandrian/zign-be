@@ -47,5 +47,6 @@ export interface GetObjectResponse {
 }
 
 export enum FILE_MIMETYPE {
-    PDF = 'application/pdf'
+    PDF = 'application/pdf',
+    PNG = 'image/png'
 }

@@ -65,6 +65,7 @@ model Document {
   user_id          String    @db.VarChar(60)
   signed_file_id   String?   @db.VarChar(60)
   original_file_id String    @db.VarChar(60)
+  cover_url        String?   @db.VarChar(255)
   sign_id          String?   @db.VarChar(60)
   status           String    @db.VarChar(20)
   metadata         Json?     @db.Json

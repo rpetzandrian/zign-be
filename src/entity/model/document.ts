@@ -7,4 +7,5 @@ export interface Document extends BaseModel {
     sign_id: string;
     status: string;
     metadata: string;
+    cover_url: string;
 }

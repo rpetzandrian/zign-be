@@ -9,6 +9,7 @@ import { DOCUMENT_STATUS } from "../entity/constant/document";
 import { Document } from "../entity/model/document";
 import { SignDocsDto } from "../entity/dto/document";
 import SignRepository from "../repository/sign_repository";
+import { Poppler } from "node-poppler";
 
 
 export class DocumentService extends Service {
@@ -76,11 +77,25 @@ export class DocumentService extends Service {
             folder: userId,
         }
         const [result] = await this.fileService.upload([file], options);
+        
+        const coverImage = await this.getCoverAsImage(file.buffer);
+        const coverFilename = `cover-test-${generateUuid()}`;
+        const coverBuffer = Buffer.from(coverImage);
+        const [savedCover] = await this.fileService.uploadPublic([{
+            buffer: coverBuffer,
+            mimetype: FILE_MIMETYPE.PNG,
+            fieldname: 'files',
+            originalname: coverFilename,
+            size: coverBuffer.byteLength,
+            filename: coverFilename,
+        }], { bucket_name: String(process.env.IMAGE_BUCKET), folder: `docs-cover/${userId}` });
+
         const doc = await this.documentRepository.create({
             id: generateUuid(),
             original_file_id: result.id as string,
             status: DOCUMENT_STATUS.DRAFT,
-            user_id: userId
+            user_id: userId,
+            cover_url: savedCover.file_url as string,
         })
 
         return doc
@@ -95,5 +110,21 @@ export class DocumentService extends Service {
         const fileId = type === 'signed' ? document.signed_file_id : document.original_file_id;
         if (!fileId) throw new BadRequestError('file not exist', 'FILE_NOT_EXIST')
         return this.fileService.downloadPreview(fileId);
+    }
+
+    async getCoverAsImage(buffer: Buffer) {
+        try {
+            const poppler = new Poppler();
+            const coverImage = await poppler.pdfToCairo(buffer, undefined, {
+                lastPageToConvert: 1,
+                pngFile: true,
+                singleFile: true,
+            });
+
+            return Buffer.from(coverImage, 'binary');
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
     }
 }

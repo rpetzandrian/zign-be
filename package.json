@@ -26,6 +26,7 @@
     "joi": "^18.0.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "node-poppler": "^8.0.5",
     "nodemailer": "^7.0.6",
     "openai": "^5.23.1",
     "pdf-lib": "^1.17.1",
