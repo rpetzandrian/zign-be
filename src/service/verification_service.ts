@@ -6,6 +6,7 @@ import { Files } from "../entity/constant/file";
 import { FileService } from "./file_service";
 import FacePlusProvider from "../lib/faceplus_provider";
 import FileOwnerRepository from "../repository/file_owner_repository";
+import { generateRandomNIK, generateUuid } from "../lib/helpers";
 
 
 export class VerificationService extends Service {
@@ -35,15 +36,22 @@ export class VerificationService extends Service {
             throw new BadRequestError('identity card file is required', 'IDENTITY_CARD_FILE_REQUIRED');
         }
 
-        const ocrResult = await this.aiProvider.doOcr(identityCardFile);
-        const parsedResult = JSON.parse(ocrResult as string);
+        let parsedResult = {
+            nik: generateRandomNIK() as string,
+            nama: `dummy-${generateUuid()}` as string,
+        }
+        
+        if(!process.env.FEATURE_TURN_OFF_AI) {
+            const ocrResult = await this.aiProvider.doOcr(identityCardFile);
+            parsedResult = JSON.parse(ocrResult as string);
+        }
 
         const faceFile = data.find(file => file.originalname.includes('face_identity'));
         if(!faceFile) {
             throw new BadRequestError('face file is required', 'FACE_FILE_REQUIRED');
         }
 
-        await this.fileService.uploadPublic([faceFile], {
+        await this.fileService.upload([faceFile], {
             bucket_name: String(process.env.IMAGE_BUCKET),
             folder: `face-identity/${user.id}`,
             filename: `${faceFile.originalname}`
@@ -84,7 +92,7 @@ export class VerificationService extends Service {
 
         await this.userRepository.update({ id: user.id }, {
             is_face_recognized: true,
-            profile_picture: profilePicture[0].key
+            profile_picture: profilePicture[0].file_url
         });
     }
 }
