@@ -113,7 +113,7 @@ export class AuthService extends Service {
     }
 
     public async forgotPassword(email: string): Promise<{ token: string }> {
-        const user = await this.userRepository.findOne({ email: email });
+        const user = await this.userRepository.findOne({ email });
         if (!user) {
             throw new BadRequestError('User not found or email is invalid.');
         }

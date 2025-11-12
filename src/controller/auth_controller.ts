@@ -47,9 +47,9 @@ export class AuthController extends Controller {
     }
 
     public async forgotPassword(req: Request, res: Response) {
-        const { token } = await this.authService.forgotPassword(req.body); // Menggunakan req.body untuk DTO
+        const { token } = await this.authService.forgotPassword(req.body.email);
         return res.send({
-            status: "success", // Menggunakan status dan message sesuai permintaan Anda
+            status: "success",
             message: "Password reset token has been sent to your email",
             data: {
                 token: token
