@@ -30,7 +30,14 @@ export class DocumentController extends Controller {
         const { params, query } = req;
         const context = (req as any).context as { user_id: string }
         const document = await this.documentService.previewDocument(params.id, query.type as string, context.user_id);
-        res.set({}).end(document.buffer, 'binary');
+        res.send({
+            buffer: document.buffer,
+            parameters: {
+                mimeType: document.mime_type,
+                fileName: document.file_name,
+                size: document.file_size,
+            }
+        })
     }
 
     public async signDocument(req: Request, res: Response) {
@@ -44,6 +51,17 @@ export class DocumentController extends Controller {
         })
     }
 
+    public async downloadDocument(req: Request, res: Response) {
+        const { params, query } = req;
+        const context = (req as any).context as { user_id: string }
+        const document = await this.documentService.previewDocument(params.id, query.type as string, context.user_id);
+        res.set({
+            'Content-Type': document.mime_type,
+            'Content-Disposition': `attachment;filename="${document.file_name}"`,
+            'Content-Length': document.file_size.toString(),
+        }).end(document.buffer, 'binary');
+    }
+
     protected setRoutes(): void {
         this._routes.post(`/v1/${this.path}/upload`, authMiddleware, UploadMiddleware(), requestValidator(UPLOAD_DOCUMENT), (req, res) => {
             return this.uploadDocs(req, res)
@@ -53,6 +71,9 @@ export class DocumentController extends Controller {
         })
         this._routes.get(`/v1/${this.path}/preview/:id`, authMiddleware, requestValidator(PREVIEW_DOCUMENT), (req, res) => {
             return this.previewDocument(req, res)
+        })
+        this._routes.get(`/v1/${this.path}/download/:id`, authMiddleware, requestValidator(PREVIEW_DOCUMENT), (req, res) => {
+            return this.downloadDocument(req, res)
         })
     }
 }
