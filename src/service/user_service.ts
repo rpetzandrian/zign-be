@@ -1,7 +1,7 @@
 
-import { NextFunction, Request, Response } from "express";
 import { Service } from "../base/service"
 import UserRepository from "../repository/user_repository";
+import { BadRequestError } from "../base/http_error";
 
 
 export class UserService extends Service {
@@ -15,7 +15,7 @@ export class UserService extends Service {
     async getProfile(userId: string) {
         const user = await this.userRepository.getUserById(userId);
         if (!user) {
-            throw new Error('User not found');
+            throw new BadRequestError('User not found', 'USER_NOT_FOUND');
         }
         return user;
     }

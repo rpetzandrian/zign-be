@@ -4,13 +4,11 @@ import Controller from "../base/controller";
 import { UserService } from "../service/user_service";
 
 export class UserController extends Controller {
-    public _routes: Router;
     private userService: UserService;
 
     constructor(userService: UserService) {
-        super('/users');
+        super('user');
         this.userService = userService;
-        this._routes = Router();
     }
 
     // === method asli tetap dipertahankan ===
@@ -26,17 +24,14 @@ export class UserController extends Controller {
         const userId = (req as any).context.user_id;
         const user = await this.userService.getProfile(userId);
         return res.send({
+            is_success: true,
             message: 'success',
             data: user
         });
     }
 
     protected setRoutes(): void {
-        this._routes.get(`${this.path}/`, (req, res) => {
-            return this.findAllUsers(req, res);
-        });
-
-        this._routes.get(`${this.path}/profile`, authMiddleware, (req, res) => {
+        this._routes.get(`/v1/${this.path}/profile`, authMiddleware, (req, res) => {
             return this.getProfile(req, res);
         });
     }
