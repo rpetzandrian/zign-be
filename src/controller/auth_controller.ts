@@ -22,7 +22,7 @@ export class AuthController extends Controller {
     }
 
     public async resendOtpEmail(req: Request, res: Response) {
-        await this.authService.resendOtpEmail((req as any).context.user_id);
+        await this.authService.resendOtpEmail((req as any).body.email);
         return res.send({
             success: true,
             message: "OTP Sent!",

@@ -44,7 +44,13 @@ export class AuthService extends Service {
 
     public async registerUser(data: RegisterUserDto): Promise<void> {
         if (data.password !== data.confirm_password) {
-            throw new BadRequestError('Password and confirm password must be same')
+            throw new BadRequestError('Password and confirm password must be same', 'PASSWORD_MISMATCH')
+        }
+
+        // Check if user already registered
+        const isExist = await this.userRepository.findOne({ email: data.email }, { attributes: ['id'] });
+        if (isExist) {
+            throw new BadRequestError('Email already registered', 'EMAIL_ALREADY_REGISTERED')
         }
 
         // Generate OTP code and expired
@@ -62,19 +68,25 @@ export class AuthService extends Service {
         await this.sendOtpCodeToEmail(user.email, code);
     }
 
-    public async resendOtpEmail(userId: string): Promise<void> {
-        const user = await this.userRepository.findOneOrFail({ id: userId });  
-        await this.sendOtpCodeToEmail(user.email, user.otp_code as string);
+    public async resendOtpEmail(email: string): Promise<void> {
+        const user = await this.userRepository.findOneOrFail({ email });
+        const { code, expired } = await this.generateOtpCodeAndExpired();
+        await this.userRepository.update({ id: user.id }, {
+            otp_code: code,
+            otp_code_expired: expired
+        });
+
+        await this.sendOtpCodeToEmail(user.email, code);
     }
 
     public async login(email: string, password: string): Promise<void> {
         const user = await this.userRepository.findOne({ email });
         if (!user) {
-            throw new BadRequestError('Invalid email or password')
+            throw new BadRequestError('Invalid email or password', 'INVALID_EMAIL_OR_PASSWORD')
         }
 
         if (!await comparePassword(password, user.password as string)) {
-            throw new BadRequestError('Invalid email or password')
+            throw new BadRequestError('Invalid email or password', 'INVALID_EMAIL_OR_PASSWORD')
         }
 
         // Generate OTP code and expired
@@ -115,7 +127,7 @@ export class AuthService extends Service {
     public async forgotPassword(email: string): Promise<{ token: string }> {
         const user = await this.userRepository.findOne({ email });
         if (!user) {
-            throw new BadRequestError('User not found or email is invalid.');
+            throw new BadRequestError('User not found or email is invalid.', 'USER_NOT_FOUND_OR_INVALID_EMAIL');
         }
         const { code, expired } = await this.generateOtpCodeAndExpired();
         const resetToken = generateJwtToken(user.id as string, '1h');
@@ -136,14 +148,17 @@ export class AuthService extends Service {
         });
         return {token: resetToken};
     }
+    
     public async resetPassword(data: ResetPasswordDto): Promise<void> {
         const { password, confirm_password, token, otp_code } = data;
         if (password !== confirm_password) {
             throw new BadRequestError('Password and confirm password must be same');
         }
+
         const user = await this.userRepository.findOneOrFail({ reset_token: token }, 
             { attributes: ['id', 'otp_code', 'otp_code_expired', 'password'] }
         );
+        
         this.validateOtp(user, otp_code);
         const newHashedPassword = await hashPassword(password);
         await this.userRepository.update({ id: user.id }, {

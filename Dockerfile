@@ -13,6 +13,7 @@ COPY ./ ./
 RUN npm run build
 
 RUN cp -a ./node_modules ./build
+RUN cp -a ./src/data ./build/src/data/
 
 #Production stage
 FROM node:alpine3.22 AS production
