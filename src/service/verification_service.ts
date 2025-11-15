@@ -6,7 +6,7 @@ import { Files } from "../entity/constant/file";
 import { FileService } from "./file_service";
 import FacePlusProvider from "../lib/faceplus_provider";
 import FileOwnerRepository from "../repository/file_owner_repository";
-import { generateRandomNIK, generateUuid } from "../lib/helpers";
+import { generateRandomNIK, generateUuid, isTruthy } from "../lib/helpers";
 
 
 export class VerificationService extends Service {
@@ -41,7 +41,7 @@ export class VerificationService extends Service {
             nama: `dummy-${generateUuid()}` as string,
         }
         
-        if(!process.env.FEATURE_TURN_OFF_AI) {
+        if(!isTruthy(process.env.FEATURE_TURN_OFF_AI)) {
             const ocrResult = await this.aiProvider.doOcr(identityCardFile);
             parsedResult = JSON.parse(ocrResult as string);
         }
@@ -80,7 +80,7 @@ export class VerificationService extends Service {
         const faceToken2 = file.buffer.toString('base64');
 
         let result: any = { confidence: 85 };
-        if (!process.env.FEATURE_TURN_OFF_FACE_RECOGNITION) {
+        if (!isTruthy(process.env.FEATURE_TURN_OFF_FACE_RECOGNITION)) {
             result = await this.facePlusProvider.compareFaces(faceToken1, faceToken2);
         }
 

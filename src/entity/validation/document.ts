@@ -8,7 +8,8 @@ export const SIGN_DOCUMENT = Joi.object({
             koor_x: Joi.number().required(),
             koor_y: Joi.number().required(),
             height: Joi.number().positive().required(),
-            weight: Joi.number().positive().required()
+            weight: Joi.number().positive().required(),
+            page: Joi.number().integer().positive().required(),
         })
     })
 })

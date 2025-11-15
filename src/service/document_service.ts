@@ -36,8 +36,13 @@ export class DocumentService extends Service {
     
             const signImage = await pdfDocs.embedPng(signBinary.Body);
             const pages = pdfDocs.getPages();
-            const firstPage = pages[0];
-            firstPage.drawImage(signImage, {
+            
+            if (payload.metadata.page >= pages.length) {
+                throw new BadRequestError('Page number is out of range')
+            }
+
+            const targetPage = pages[payload.metadata.page];
+            targetPage.drawImage(signImage, {
                 x: payload.metadata.koor_x,
                 y: payload.metadata.koor_y,
                 width: payload.metadata.width,
@@ -67,6 +72,7 @@ export class DocumentService extends Service {
             const updatedDocs = await this.documentRepository.findOneOrFail({ id: payload.document_id });
             return updatedDocs;
         } catch (error) {
+            this.logger.error(error)
             throw error
         }
     }
@@ -123,8 +129,8 @@ export class DocumentService extends Service {
 
             return Buffer.from(coverImage, 'binary');
         } catch (error) {
-            console.log(error)
+            this.logger.error(error)
             throw error
         }
     }
-}
+}``

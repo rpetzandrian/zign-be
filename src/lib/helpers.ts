@@ -23,3 +23,5 @@ export const generateRandomNIK = () => {
 
     return firstPart + secondPart + last8Digits;
 }
+
+export const isTruthy = (value: any) => value === true || value === 'true' || value === 1 || value === '1';

@@ -25,6 +25,7 @@ import { SignController } from './controller/sign_controller';
 import UserRepository from './repository/user_repository';
 import FileOwnerRepository from './repository/file_owner_repository';
 import FacePlusProvider from './lib/faceplus_provider';
+import { isTruthy } from './lib/helpers';
 
 class App extends BaseApp {
     constructor({ port = 8000 }) {
@@ -46,11 +47,11 @@ class App extends BaseApp {
         /** Initialize providers */
         await EventProvider.initialize();
 
-        if (process.env.FEATURE_TURN_OFF_EMAIL !== '1') {
+        if (!isTruthy(process.env.FEATURE_TURN_OFF_EMAIL)) {
             MailtrapEmailProvider.initialize();
         }
 
-        if (process.env.FEATURE_TURN_OFF_AI !== '1') {
+        if (!isTruthy(process.env.FEATURE_TURN_OFF_AI)) {
             AiProvider.initialize();
         }
 

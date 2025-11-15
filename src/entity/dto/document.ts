@@ -6,5 +6,6 @@ export interface SignDocsDto {
         koor_y: number;
         height: number;
         width: number;
+        page: number;
     }
 }

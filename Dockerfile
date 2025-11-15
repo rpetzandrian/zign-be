@@ -20,6 +20,9 @@ FROM node:alpine3.22 AS production
 
 ENV NODE_ENV=production
 
+# Install Poppler
+RUN apk add --no-cache poppler-utils
+
 WORKDIR /app
 
 COPY --from=build /app/build ./
