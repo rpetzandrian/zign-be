@@ -79,14 +79,15 @@ model Document {
 }
 
 model Sign {
-  id         String    @id @default(uuid()) @db.VarChar(60)
-  user_id    String    @db.VarChar(60)
-  file_id    String    @db.VarChar(60)
-  metadata   Json?     @db.Json
-  created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime  @default(now()) @updatedAt @db.Timestamp(6)
-  deleted_at DateTime? @db.Timestamp(6)
-  file       File?     @relation(fields: [file_id], references: [id])
+  id          String    @id @default(uuid()) @db.VarChar(60)
+  user_id     String    @db.VarChar(60)
+  file_id     String    @db.VarChar(60)
+  metadata    Json?     @db.Json
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deleted_at  DateTime? @db.Timestamp(6)
+  preview_url String?   @db.VarChar(255)
+  file        File?     @relation(fields: [file_id], references: [id])
 
   @@map("signs")
 }

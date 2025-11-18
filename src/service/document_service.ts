@@ -133,4 +133,13 @@ export class DocumentService extends Service {
             throw error
         }
     }
-}``
+
+    public async getDocumentList(userId: string): Promise<Document[]> {
+        const documents = await this.documentRepository.findAll({ user_id: userId }, { attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'cover_url', 'status'] });
+        if (documents.length === 0) {
+            throw new BadRequestError('you`re not owner this document', 'NOT_DOCUMENT_OWNER')
+        }
+
+        return documents
+    }
+}

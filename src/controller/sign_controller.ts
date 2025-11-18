@@ -25,10 +25,22 @@ export class SignController extends Controller {
         })
     }
 
+    public async getSignSpecimen(req: Request, res: Response) {
+        const context = (req as any).context as { user_id: string }
+        const documents = await this.signService.getSignSpecimen(context.user_id);
+        return res.send({
+            success: true,
+            message: 'Success get sign specimen',
+            data: documents
+        })
+    }
 
     protected setRoutes(): void {
         this._routes.post(`/v1/${this.path}/upload`, authMiddleware, UploadMiddleware(), requestValidator(UPLOAD_DOCUMENT), (req, res) => {
             return this.uploadSignSpecimen(req, res)
+        })
+        this._routes.get(`/v1/${this.path}/specimen`, authMiddleware, (req, res) => {
+            return this.getSignSpecimen(req, res)
         })
     }
 }

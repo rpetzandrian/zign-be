@@ -20,13 +20,22 @@ export class SignService extends Service {
             bucket_name: String(process.env.IMAGE_BUCKET),
             folder: `sign-specimen/${userId}`,
         }
-        const [result] = await this.fileService.upload([file], options);
+        const [result] = await this.fileService.uploadPublic([file], options);
         const sign = await this.signRepository.create({
             id: generateUuid(),
             file_id: result.id as string,
-            user_id: userId
+            user_id: userId,
+            preview_url: result.file_url as string,
         })
 
         return sign
+    }
+
+    async getSignSpecimen(userId: string): Promise<Sign[]> {
+        const signs = await this.signRepository.findAll({
+            user_id: userId,
+        }, { attributes: ['id', 'user_id', 'preview_url', 'created_at'] })
+
+        return signs
     }
 }

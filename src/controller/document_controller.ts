@@ -62,6 +62,16 @@ export class DocumentController extends Controller {
         }).end(document.buffer, 'binary');
     }
 
+    public async getDocumentList(req: Request, res: Response) {
+        const context = (req as any).context as { user_id: string }
+        const documents = await this.documentService.getDocumentList(context.user_id);
+        return res.send({
+            success: true,
+            message: 'Success get document list',
+            data: documents
+        })
+    }
+
     protected setRoutes(): void {
         this._routes.post(`/v1/${this.path}/upload`, authMiddleware, UploadMiddleware(), requestValidator(UPLOAD_DOCUMENT), (req, res) => {
             return this.uploadDocs(req, res)
@@ -74,6 +84,9 @@ export class DocumentController extends Controller {
         })
         this._routes.get(`/v1/${this.path}/download/:id`, authMiddleware, requestValidator(PREVIEW_DOCUMENT), (req, res) => {
             return this.downloadDocument(req, res)
+        })
+        this._routes.get(`/v1/${this.path}/list`, authMiddleware, (req, res) => {
+            return this.getDocumentList(req, res)
         })
     }
 }
