@@ -41,7 +41,7 @@ export class DocumentService extends Service {
                 throw new BadRequestError('Page number is out of range')
             }
 
-            const targetPage = pages[payload.metadata.page];
+            const targetPage = pages[payload.metadata.page - 1];
             targetPage.drawImage(signImage, {
                 x: payload.metadata.koor_x,
                 y: payload.metadata.koor_y,
