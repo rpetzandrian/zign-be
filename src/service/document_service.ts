@@ -37,7 +37,7 @@ export class DocumentService extends Service {
             const signImage = await pdfDocs.embedPng(signBinary.Body);
             const pages = pdfDocs.getPages();
             
-            if (payload.metadata.page >= pages.length) {
+            if (payload.metadata.page > pages.length) {
                 throw new BadRequestError('Page number is out of range')
             }
 
