@@ -49,6 +49,16 @@ export class DocumentService extends Service {
                 height: payload.metadata.height,
             });
 
+            const metadata = { 
+                sign_at: new Date(),
+                creator: 'Zign App',
+                author: userId
+            }
+
+            pdfDocs.setModificationDate(metadata.sign_at);
+            pdfDocs.setAuthor(userId);
+            pdfDocs.setCreator('Zign App');
+            
             const pdfBytes = await pdfDocs.save();
             const pdfBuffer = Buffer.from(pdfBytes);
             const pdfFilename = `${generateUuid()}.pdf`;
@@ -66,7 +76,7 @@ export class DocumentService extends Service {
                 signed_file_id: savedSignedDocs.id as string,
                 sign_id: sign.id as string,
                 status: DOCUMENT_STATUS.SIGNED,
-                metadata: JSON.stringify({ sign_at: new Date() }),
+                metadata: JSON.stringify(metadata),
             })
 
             const updatedDocs = await this.documentRepository.findOneOrFail({ id: payload.document_id });
