@@ -43,11 +43,20 @@ export class BaseRepository<T, Entity> {
     }
 
     public async findAll(where?: Partial<Entity>, opts?: Opts): Promise<Entity[]> {
+        const page = opts?.page ?? 1;
+        const limit = opts?.limit ?? 10;
+
+        const skip = (page - 1) * limit;
+        const take = limit;
+
         const datas = await (this.model as any).findMany({
             select: this.generateAttributes(opts?.attributes),
             where,
             orderBy: this.generateSort(opts?.sort),
+            skip,
+            take
         });
+
         return datas as Entity[];
     }
 

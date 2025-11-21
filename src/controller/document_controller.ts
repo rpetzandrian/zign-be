@@ -64,7 +64,9 @@ export class DocumentController extends Controller {
 
     public async getDocumentList(req: Request, res: Response) {
         const context = (req as any).context as { user_id: string }
-        const documents = await this.documentService.getDocumentList(context.user_id);
+        const limit = req.query.limit ? Number(req.query.limit) : undefined;
+        const page = req.query.page ? Number(req.query.page) : undefined;
+        const documents = await this.documentService.getDocumentList(context.user_id , page, limit);
         return res.send({
             success: true,
             message: 'Success get document list',

@@ -33,10 +33,10 @@ export class DocumentService extends Service {
             const docsBinary = await this.fileService.getFile(docs.original_file_id);
             const signBinary = await this.fileService.getFile(sign.file_id)
             const pdfDocs = await PDFDocument.load(docsBinary.Body);
-    
+
             const signImage = await pdfDocs.embedPng(signBinary.Body);
             const pages = pdfDocs.getPages();
-            
+
             if (payload.metadata.page > pages.length) {
                 throw new BadRequestError('Page number is out of range')
             }
@@ -48,7 +48,7 @@ export class DocumentService extends Service {
                 width: payload.metadata.width,
                 height: payload.metadata.height,
             });
-    
+
             const pdfBytes = await pdfDocs.save();
             const pdfBuffer = Buffer.from(pdfBytes);
             const pdfFilename = `${generateUuid()}.pdf`;
@@ -62,9 +62,9 @@ export class DocumentService extends Service {
                 filename: pdfFilename
             }], { bucket_name: String(process.env.DOCUMENT_BUCKET), folder: userId })
 
-            await this.documentRepository.update({ id: docs.id }, { 
-                signed_file_id: savedSignedDocs.id as string, 
-                sign_id: sign.id as string, 
+            await this.documentRepository.update({ id: docs.id }, {
+                signed_file_id: savedSignedDocs.id as string,
+                sign_id: sign.id as string,
                 status: DOCUMENT_STATUS.SIGNED,
                 metadata: JSON.stringify({ sign_at: new Date() }),
             })
@@ -83,7 +83,7 @@ export class DocumentService extends Service {
             folder: userId,
         }
         const [result] = await this.fileService.upload([file], options);
-        
+
         const coverImage = await this.getCoverAsImage(file.buffer);
         const coverFilename = `cover-test-${generateUuid()}`;
         const coverBuffer = Buffer.from(coverImage);
@@ -134,12 +134,36 @@ export class DocumentService extends Service {
         }
     }
 
-    public async getDocumentList(userId: string): Promise<Document[]> {
-        const documents = await this.documentRepository.findAll({ user_id: userId }, { attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'cover_url', 'status'] });
-        if (documents.length === 0) {
-            throw new BadRequestError('you`re not owner this document', 'NOT_DOCUMENT_OWNER')
-        }
+    public async getDocumentList(userId: string, page: number = 1, limit: number = 10) {
 
-        return documents
+        // Total record tanpa paging
+        const count_total_size = await this.documentRepository.count({
+            user_id: userId
+        });
+
+        // Ambil data sesuai page
+        const documents = await this.documentRepository.findAll(
+            { user_id: userId },
+            {
+                attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'cover_url', 'status'],
+                page,
+                limit
+            }
+        );
+
+        const count_total = documents.length;
+        const count_total_page = Math.ceil(count_total_size / limit);
+
+        return {
+            count_total_size,
+            count_total_page,
+            count_total,
+            previous_page: page > 1 ? page - 1 : null,
+            next_page: page < count_total_page ? page + 1 : null,
+            rows_data: {
+                docs: documents
+            }
+        };
     }
+
 }
