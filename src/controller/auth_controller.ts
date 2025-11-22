@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Controller from "../base/controller";
 import { AuthService } from "../service/auth_service";
-import { authMiddleware } from "../middleware/auth_middleware";
 import { requestValidator } from "../middleware/request_middleware";
 import { LOGIN_SCHEMA, REGISTER_SCHEMA, RESEND_OTP_SCHEMA, VERIFY_OTP_SCHEMA , FORGOT_PASSWORD_SCHEMA, RESET_PASSWORD_SCHEMA} from "../entity/validation/auth";
 

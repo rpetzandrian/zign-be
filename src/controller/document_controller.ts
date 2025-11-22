@@ -75,10 +75,14 @@ export class DocumentController extends Controller {
         })
     }
 
-    public async getQR(req: Request, res: Response) {
-        const { error, body } = await QrGenerator.generate('https://google.com')
-        res.set({
-        }).end(body, 'binary');
+    public async validityCheckDocument(req: Request, res: Response) {
+        const { params } = req;
+        const document = await this.documentService.validityCheckDocument(params.id);
+        return res.send({
+            success: true,
+            message: 'Validity check document',
+            data: document
+        })
     }
 
     protected setRoutes(): void {
@@ -97,8 +101,8 @@ export class DocumentController extends Controller {
         this._routes.get(`/v1/${this.path}/list`, authMiddleware, (req, res) => {
             return this.getDocumentList(req, res)
         })
-        this._routes.get(`/v1/${this.path}/qr`, (req, res) => {
-            return this.getQR(req, res)
+        this._routes.get(`/v1/${this.path}/validity/:id`, (req, res) => {
+            return this.validityCheckDocument(req, res)
         })
     }
 }

@@ -10,6 +10,8 @@ import { Document } from "../entity/model/document";
 import { SignDocsDto } from "../entity/dto/document";
 import SignRepository from "../repository/sign_repository";
 import { Poppler } from "node-poppler";
+import { QrGenerator } from "../lib/qr_generator";
+import { format } from "date-fns";
 
 
 export class DocumentService extends Service {
@@ -49,15 +51,28 @@ export class DocumentService extends Service {
                 height: payload.metadata.height,
             });
 
+            const qrCodeBuffer = await this.generateSignQRCode(docs.id as string);
+            const pdfQr = await pdfDocs.embedPng(qrCodeBuffer);
+            const addedQr = pages.map((page) => {
+                page.drawImage(pdfQr, {
+                    x: 5,
+                    y: 5,
+                    width: 75,
+                    height: 75,
+                })
+            });
+            await Promise.all(addedQr);
+
             const metadata: any = { 
                 sign_at: new Date(),
                 creator: 'Zign App',
-                author: userId
+                author: userId,
             }
 
             pdfDocs.setModificationDate(metadata.sign_at);
             pdfDocs.setAuthor(userId);
             pdfDocs.setCreator('Zign App');
+            pdfDocs.setKeywords([docs.id as string]);
             
             const pdfBytes = await pdfDocs.save();
             const pdfBuffer = Buffer.from(pdfBytes);
@@ -158,7 +173,7 @@ export class DocumentService extends Service {
         const documents = await this.documentRepository.findAll(
             { user_id: userId },
             {
-                attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'cover_url', 'status' , 'created_at'],
+                attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'cover_url', 'status'],
                 page,
                 limit
             }
@@ -179,4 +194,33 @@ export class DocumentService extends Service {
         };
     }
 
+    private async generateSignQRCode(documentId: string): Promise<Buffer> {
+        const url = `${process.env.WEB_BASE_URL}/check?key=${documentId}`;
+        const qr = await QrGenerator.generate(url);
+
+        if (qr.error) {
+            throw new BadRequestError(`${qr.error}`, 'GENERATE_SIGN_QR_CODE_ERROR')
+        }
+        
+        return qr.body as Buffer;
+    }
+
+    public async validityCheckDocument(documentId: string) {
+        const document = await this.documentRepository.findOneOrFail({ id: documentId }, { attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'status', 'metadata', 'cover_url'] });
+        if (document.status !== DOCUMENT_STATUS.SIGNED) {
+            return {
+                is_valid: false
+            }
+        }
+        
+        const metadata = JSON.parse(document.metadata as string);
+        return {
+            is_valid: metadata.sign_at ? true : false,
+            sign_at: metadata.sign_at ? format(new Date(metadata.sign_at), 'dd MMMM yyyy HH:mm:ss') : null,
+            author: metadata.author ? metadata.author : null,
+            provider: metadata.creator ? metadata.creator : null,
+            checksum: metadata.checksum ? metadata.checksum : null,
+            document_cover_url: document.cover_url ? document.cover_url : null,
+        }
+    }
 }

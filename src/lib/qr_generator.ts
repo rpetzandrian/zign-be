@@ -16,7 +16,7 @@ export class QrGenerator {
                 height: 200,
                 margin: 0.5,
                 qrOptions: {
-                    typeNumber: 3,
+                    typeNumber: 6,
                     mode: 'Byte',
                     errorCorrectionLevel: 'Q',
                 },
