@@ -27,7 +27,9 @@ export class SignController extends Controller {
 
     public async getSignSpecimen(req: Request, res: Response) {
         const context = (req as any).context as { user_id: string }
-        const documents = await this.signService.getSignSpecimen(context.user_id);
+        const limit = req.query.limit ? Number(req.query.limit) : undefined;
+        const page = req.query.page ? Number(req.query.page) : undefined;
+        const documents = await this.signService.getSignSpecimen(context.user_id , page , limit);
         return res.send({
             success: true,
             message: 'Success get sign specimen',
