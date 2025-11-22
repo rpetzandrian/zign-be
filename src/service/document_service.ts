@@ -158,7 +158,7 @@ export class DocumentService extends Service {
         const documents = await this.documentRepository.findAll(
             { user_id: userId },
             {
-                attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'cover_url', 'status'],
+                attributes: ['id', 'original_file_id', 'signed_file_id', 'user_id', 'cover_url', 'status' , 'created_at'],
                 page,
                 limit
             }
