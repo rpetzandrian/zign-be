@@ -11,6 +11,7 @@ export interface Files{
     stream?: Readable;
     destination?: string;
     path?: string;
+    checksum?: string;
 }
 
 export const S3_DEFAULT = {

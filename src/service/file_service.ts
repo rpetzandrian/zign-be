@@ -98,7 +98,7 @@ export class FileService extends Service {
                     file_name: file.originalname,
                     file_size: file.size,
                     mime_type: file.mimetype,
-                    checksum: generateChecksum(file.buffer)
+                    checksum: file.checksum || generateChecksum(file.buffer)
                 }
             })
             .catch((err) => {
