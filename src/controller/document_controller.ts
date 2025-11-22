@@ -6,6 +6,7 @@ import { authMiddleware } from "../middleware/auth_middleware";
 import { requestValidator } from "../middleware/request_middleware";
 import { PREVIEW_DOCUMENT, SIGN_DOCUMENT, UPLOAD_DOCUMENT } from "../entity/validation/document";
 import { SignDocsDto } from "src/entity/dto/document";
+import { QrGenerator } from "../lib/qr_generator";
 
 
 export class DocumentController extends Controller {
@@ -74,6 +75,12 @@ export class DocumentController extends Controller {
         })
     }
 
+    public async getQR(req: Request, res: Response) {
+        const { error, body } = await QrGenerator.generate('https://google.com')
+        res.set({
+        }).end(body, 'binary');
+    }
+
     protected setRoutes(): void {
         this._routes.post(`/v1/${this.path}/upload`, authMiddleware, UploadMiddleware(), requestValidator(UPLOAD_DOCUMENT), (req, res) => {
             return this.uploadDocs(req, res)
@@ -89,6 +96,9 @@ export class DocumentController extends Controller {
         })
         this._routes.get(`/v1/${this.path}/list`, authMiddleware, (req, res) => {
             return this.getDocumentList(req, res)
+        })
+        this._routes.get(`/v1/${this.path}/qr`, (req, res) => {
+            return this.getQR(req, res)
         })
     }
 }

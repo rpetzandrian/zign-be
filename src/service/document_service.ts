@@ -1,6 +1,6 @@
 import { Service } from "../base/service";
 import { FILE_MIMETYPE, Files } from "../entity/constant/file";
-import { generateUuid } from "../lib/helpers";
+import { generateChecksum, generateUuid } from "../lib/helpers";
 import { BadRequestError, NotFoundError } from "../base/http_error";
 import { PDFDocument } from "pdf-lib";
 import { FileService } from "./file_service";
@@ -49,7 +49,7 @@ export class DocumentService extends Service {
                 height: payload.metadata.height,
             });
 
-            const metadata = { 
+            const metadata: any = { 
                 sign_at: new Date(),
                 creator: 'Zign App',
                 author: userId
@@ -63,13 +63,16 @@ export class DocumentService extends Service {
             const pdfBuffer = Buffer.from(pdfBytes);
             const pdfFilename = `${generateUuid()}.pdf`;
 
+            const checksum = generateChecksum(pdfBuffer);
+            metadata.checksum = checksum;
             const [savedSignedDocs] = await this.fileService.upload([{
                 buffer: pdfBuffer,
                 mimetype: FILE_MIMETYPE.PDF,
                 fieldname: 'files',
                 originalname: pdfFilename,
                 size: pdfBuffer.byteLength,
-                filename: pdfFilename
+                filename: pdfFilename,
+                checksum,
             }], { bucket_name: String(process.env.DOCUMENT_BUCKET), folder: userId })
 
             await this.documentRepository.update({ id: docs.id }, {
