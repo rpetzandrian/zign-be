@@ -31,11 +31,33 @@ export class SignService extends Service {
         return sign
     }
 
-    async getSignSpecimen(userId: string): Promise<Sign[]> {
-        const signs = await this.signRepository.findAll({
-            user_id: userId,
-        }, { attributes: ['id', 'user_id', 'preview_url', 'created_at'] })
+    public async getSignSpecimen(userId: string, page: number = 1, limit: number = 10) {
+        const count_total_size = await this.signRepository.count({
+            user_id: userId
+        });
+        // const signs = await this.signRepository.findAll({
+        //     user_id: userId,
+        // }, { attributes: ['id', 'user_id', 'preview_url', 'created_at'] })
+        const signs = await this.signRepository.findAll(
+            { user_id : userId },
+            {
+                attributes : ['id' , 'user_id' , 'preview_url' , 'created_at'],
+                page,
+                limit
+            }
+        )
+        const count_total = signs.length;
+        const count_total_page = Math.ceil(count_total_size / limit);
 
-        return signs
+        return {
+            count_total_size,
+            count_total_page,
+            count_total,
+            previous_page: page > 1 ? page - 1 : null,
+            next_page: page < count_total_page ? page + 1 : null,
+            rows_data: {
+                docs: signs
+            }
+        };
     }
 }
