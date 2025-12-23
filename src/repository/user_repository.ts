@@ -17,7 +17,8 @@ export default class UserRepository extends BaseRepository<Prisma.UserDelegate<a
         is_email_verified: true,
         is_verified: true,
         is_face_recognized: true,
-        profile_picture: true
+        profile_picture: true,
+        card_no: true
       },
     });
   }

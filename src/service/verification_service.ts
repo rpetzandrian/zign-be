@@ -6,7 +6,7 @@ import { Files } from "../entity/constant/file";
 import { FileService } from "./file_service";
 import FacePlusProvider from "../lib/faceplus_provider";
 import FileOwnerRepository from "../repository/file_owner_repository";
-import { generateRandomNIK, generateUuid, isTruthy } from "../lib/helpers";
+import { generateRandomNIK, generateUuid, isTruthy, validateImageMimeType } from "../lib/helpers";
 
 
 export class VerificationService extends Service {
@@ -26,6 +26,8 @@ export class VerificationService extends Service {
     }
 
     public async verifyUser(data: Files[], userId: string) {
+        data.forEach(file => validateImageMimeType(file));
+        
         const user = await this.userRepository.findOneOrFail({ id: userId });
         if (user.is_verified) {
             throw new BadRequestError('user already verified', 'USER_ALREADY_VERIFIED');
@@ -65,6 +67,7 @@ export class VerificationService extends Service {
     }
 
     public async faceRecognition(file: Files, userId: string) {
+        validateImageMimeType(file);
         const user = await this.userRepository.findOneOrFail({ id: userId });
         if (user.is_face_recognized) {
             throw new BadRequestError('user already face recognized', 'USER_ALREADY_FACE_RECOGNIZED');

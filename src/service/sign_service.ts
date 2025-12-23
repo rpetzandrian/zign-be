@@ -1,6 +1,6 @@
 import { Service } from "../base/service";
 import { Files } from "../entity/constant/file";
-import { generateUuid } from "../lib/helpers";
+import { generateUuid, validateImageMimeType } from "../lib/helpers";
 import { FileService } from "./file_service";
 import SignRepository from "../repository/sign_repository";
 import { Sign } from "../entity/model/sign";
@@ -16,6 +16,7 @@ export class SignService extends Service {
     }
 
     async uploadSignSpecimen(file: Files, userId: string): Promise<Sign> {
+        validateImageMimeType(file);
         const options = {
             bucket_name: String(process.env.IMAGE_BUCKET),
             folder: `sign-specimen/${userId}`,

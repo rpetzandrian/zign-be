@@ -13,6 +13,11 @@ export class SendEmailSubscriber extends EventSubscriber<SendEmailPayload> {
 
     public async handler(payload: SendEmailPayload): Promise<void> {
         this.logger.info(`[SendEmail] sending email to -> ${payload.to} with code -> ${payload.code}`);
-        await this.emailService.send(payload);
+        try {
+            await this.emailService.send(payload);
+            this.logger.info(`[SendEmail] email sent to -> ${payload.to} with code -> ${payload.code}`);
+        } catch (error) {
+            this.logger.error(`[SendEmail] error sending email to -> ${payload.to} with code -> ${payload.code}`);
+        }
     }
 }

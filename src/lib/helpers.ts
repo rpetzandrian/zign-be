@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import { BadRequestError } from "../base/http_error";
+import { Files } from "../entity/constant/file";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -25,3 +27,10 @@ export const generateRandomNIK = () => {
 }
 
 export const isTruthy = (value: any) => value === true || value === 'true' || value === 1 || value === '1';
+
+export const validateImageMimeType = (file: Files) => {
+    // validate only image format
+    if (!file.mimetype.match(/(image\/jpeg|image\/png|image\/jpg)/)) {
+        throw new BadRequestError('file format must be image', 'INVALID_FILE_FORMAT')
+    }
+}

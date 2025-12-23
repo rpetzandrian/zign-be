@@ -27,78 +27,6 @@ export class DocumentService extends Service {
 
     async signDocument(payload: SignDocsDto, userId: string) {
         try {
-            // const [docs, sign] = await Promise.all([
-            //     this.documentRepository.findOneOrFail({ id: payload.document_id }),
-            //     this.signRepository.findOneOrFail({ id: payload.sign_id })
-            // ])
-
-            // const docsBinary = await this.fileService.getFile(docs.original_file_id);
-            // const signBinary = await this.fileService.getFile(sign.file_id)
-            // const pdfDocs = await PDFDocument.load(docsBinary.Body);
-
-            // const signImage = await pdfDocs.embedPng(signBinary.Body);
-            // const pages = pdfDocs.getPages();
-
-            // if (payload.metadata.page > pages.length) {
-            //     throw new BadRequestError('Page number is out of range')
-            // }
-
-            // const targetPage = pages[payload.metadata.page - 1];
-            // targetPage.drawImage(signImage, {
-            //     x: payload.metadata.koor_x,
-            //     y: payload.metadata.koor_y,
-            //     width: payload.metadata.width,
-            //     height: payload.metadata.height,
-            // });
-
-            // const qrCodeBuffer = await this.generateSignQRCode(docs.id as string);
-            // const pdfQr = await pdfDocs.embedPng(qrCodeBuffer);
-            // const addedQr = pages.map((page) => {
-            //     page.drawImage(pdfQr, {
-            //         x: 5,
-            //         y: 5,
-            //         width: 75,
-            //         height: 75,
-            //     })
-            // });
-            // await Promise.all(addedQr);
-
-            // const metadata: any = { 
-            //     sign_at: new Date(),
-            //     creator: 'Zign App',
-            //     author: userId,
-            // }
-
-            // pdfDocs.setModificationDate(metadata.sign_at);
-            // pdfDocs.setAuthor(userId);
-            // pdfDocs.setCreator('Zign App');
-            // pdfDocs.setKeywords([docs.id as string]);
-            
-            // const pdfBytes = await pdfDocs.save();
-            // const pdfBuffer = Buffer.from(pdfBytes);
-            // const pdfFilename = `${generateUuid()}.pdf`;
-
-            // const checksum = generateChecksum(pdfBuffer);
-            // metadata.checksum = checksum;
-            // const [savedSignedDocs] = await this.fileService.upload([{
-            //     buffer: pdfBuffer,
-            //     mimetype: FILE_MIMETYPE.PDF,
-            //     fieldname: 'files',
-            //     originalname: pdfFilename,
-            //     size: pdfBuffer.byteLength,
-            //     filename: pdfFilename,
-            //     checksum,
-            // }], { bucket_name: String(process.env.DOCUMENT_BUCKET), folder: userId })
-
-            // await this.documentRepository.update({ id: docs.id }, {
-            //     signed_file_id: savedSignedDocs.id as string,
-            //     sign_id: sign.id as string,
-            //     status: DOCUMENT_STATUS.SIGNED,
-            //     metadata: JSON.stringify(metadata),
-            // })
-
-            // const updatedDocs = await this.documentRepository.findOneOrFail({ id: payload.document_id });
-            // return updatedDocs;
             const [docs, sign] = await Promise.all([
                 this.documentRepository.findOneOrFail({ id: payload.document_id }),
                 this.signRepository.findOneOrFail({ id: payload.sign_id })
@@ -123,24 +51,50 @@ export class DocumentService extends Service {
                 height: payload.metadata.height,
             });
 
+            const qrCodeBuffer = await this.generateSignQRCode(docs.id as string);
+            const pdfQr = await pdfDocs.embedPng(qrCodeBuffer);
+            const addedQr = pages.map((page) => {
+                page.drawImage(pdfQr, {
+                    x: 5,
+                    y: 5,
+                    width: 75,
+                    height: 75,
+                })
+            });
+            await Promise.all(addedQr);
+
+            const metadata: any = { 
+                sign_at: new Date(),
+                creator: 'Zign App',
+                author: userId,
+            }
+
+            pdfDocs.setModificationDate(metadata.sign_at);
+            pdfDocs.setAuthor(userId);
+            pdfDocs.setCreator('Zign App');
+            pdfDocs.setKeywords([docs.id as string]);
+            
             const pdfBytes = await pdfDocs.save();
             const pdfBuffer = Buffer.from(pdfBytes);
             const pdfFilename = `${generateUuid()}.pdf`;
 
+            const checksum = generateChecksum(pdfBuffer);
+            metadata.checksum = checksum;
             const [savedSignedDocs] = await this.fileService.upload([{
                 buffer: pdfBuffer,
                 mimetype: FILE_MIMETYPE.PDF,
                 fieldname: 'files',
                 originalname: pdfFilename,
                 size: pdfBuffer.byteLength,
-                filename: pdfFilename
+                filename: pdfFilename,
+                checksum,
             }], { bucket_name: String(process.env.DOCUMENT_BUCKET), folder: userId })
 
             await this.documentRepository.update({ id: docs.id }, {
                 signed_file_id: savedSignedDocs.id as string,
                 sign_id: sign.id as string,
                 status: DOCUMENT_STATUS.SIGNED,
-                metadata: JSON.stringify({ sign_at: new Date() }),
+                metadata: JSON.stringify(metadata),
             })
 
             const updatedDocs = await this.documentRepository.findOneOrFail({ id: payload.document_id });
@@ -152,6 +106,7 @@ export class DocumentService extends Service {
     }
 
     async uploadDocument(file: Files, userId: string): Promise<Document> {
+        this.validateDocumentMimeType(file);
         const options = {
             bucket_name: String(process.env.DOCUMENT_BUCKET),
             folder: userId,
@@ -209,7 +164,6 @@ export class DocumentService extends Service {
     }
 
     public async getDocumentList(userId: string, page: number = 1, limit: number = 10) {
-
         // Total record tanpa paging
         const count_total_size = await this.documentRepository.count({
             user_id: userId
@@ -267,6 +221,13 @@ export class DocumentService extends Service {
             provider: metadata.creator ? metadata.creator : null,
             checksum: metadata.checksum ? metadata.checksum : null,
             document_cover_url: document.cover_url ? document.cover_url : null,
+        }
+    }
+
+    private validateDocumentMimeType(file: Files) {
+        // validate only pdf format
+        if (!file.mimetype.match(/(pdf)/)) {
+            throw new BadRequestError('file format must be pdf', 'INVALID_FILE_FORMAT')
         }
     }
 }
