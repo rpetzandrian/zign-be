@@ -87,7 +87,7 @@ class App extends BaseApp {
         const authService = new AuthService(userRepository);
         const fileService = new FileService(fileRepository, s3Provider, fileOwnerRepository);
         const verificationService = new VerificationService(userRepository, aiProvider, fileService, facePlusProvider, fileOwnerRepository);
-        const documentService = new DocumentService(fileService, documentRepository, signRepository);
+        const documentService = new DocumentService(fileService, documentRepository, signRepository, userRepository);
         const signService = new SignService(fileService, signRepository);
 
         /** Initialize controllers */
