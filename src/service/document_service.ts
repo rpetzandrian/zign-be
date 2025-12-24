@@ -12,21 +12,29 @@ import SignRepository from "../repository/sign_repository";
 import { Poppler } from "node-poppler";
 import { QrGenerator } from "../lib/qr_generator";
 import { format } from "date-fns";
+import UserRepository from "src/repository/user_repository";
 
 
 export class DocumentService extends Service {
     private fileService: FileService;
     private documentRepository: DocumentRepository;
-    private signRepository: SignRepository
-    public constructor(fileService: FileService, documentRepository: DocumentRepository, signRepository: SignRepository) {
+    private signRepository: SignRepository;
+    private userRepository: UserRepository;
+    public constructor(fileService: FileService, documentRepository: DocumentRepository, signRepository: SignRepository, userRepository: UserRepository) {
         super();
         this.fileService = fileService;
         this.documentRepository = documentRepository;
         this.signRepository = signRepository;
+        this.userRepository = userRepository;
     }
 
     async signDocument(payload: SignDocsDto, userId: string) {
         try {
+            const user = await this.userRepository.findOneOrFail({ id: userId }, { attributes: ['id', 'is_verified'] });
+            if (!user.is_verified) {
+                throw new BadRequestError('User not verified', 'USER_NOT_VERIFIED');
+            }
+
             const [docs, sign] = await Promise.all([
                 this.documentRepository.findOneOrFail({ id: payload.document_id }),
                 this.signRepository.findOneOrFail({ id: payload.sign_id })

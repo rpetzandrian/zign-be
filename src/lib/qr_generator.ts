@@ -1,6 +1,7 @@
 import qrcodeStyling from 'qr-code-styling';
 import nodeCanvas from 'canvas';
 import { JSDOM } from 'jsdom';
+import logger from './logger';
 
 export class QrGenerator {
     public static async generate(url: string): Promise<{ error?: Error, body?: Buffer }> {
@@ -48,6 +49,7 @@ export class QrGenerator {
             const buffer = await qrCode.getRawData('png');
             return { body: buffer as Buffer }
         } catch (error: any) {
+            logger.error('Error generate qr code', error);
             return { error: error as Error }
         }
     }
