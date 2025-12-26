@@ -6,3 +6,6 @@ yarn.lock
 
 build
 .cache
+
+.nyc_output
+coverage

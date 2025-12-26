@@ -1,0 +1,30 @@
+{
+    "extension": [
+        ".ts"
+    ],
+    "require": [
+        "ts-node/register/transpile-only"
+    ],
+    "include": [
+        "src/service"
+    ],
+    "exclude": [
+        "src/repositories",
+        "src/outbound",
+        "src/entity",
+        "src/app.ts",
+        "src/controller",
+        "src/subsriber",
+        "src/middleware",
+        "src/data",
+        "src/lib",
+        "src/base"
+    ],
+    "reporter": [
+        "html",
+        "text"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "lines": 50
+}

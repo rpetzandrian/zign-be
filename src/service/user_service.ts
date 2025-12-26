@@ -19,11 +19,6 @@ export class UserService extends Service {
         }
         return user;
     }
-
-    public async findAllUsers(data: any) {
-        const user = await this.userRepository.findAll();
-        return user
-    }
 }
 
 export default UserService

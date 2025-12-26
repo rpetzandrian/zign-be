@@ -104,3 +104,5 @@ export class VerificationService extends Service {
         });
     }
 }
+
+export default VerificationService;

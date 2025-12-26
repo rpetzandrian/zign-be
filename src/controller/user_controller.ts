@@ -11,15 +11,6 @@ export class UserController extends Controller {
         this.userService = userService;
     }
 
-    // === method asli tetap dipertahankan ===
-    public async findAllUsers(req: Request, res: Response) {
-        const user = await this.userService.findAllUsers(req.body);
-        return res.send({
-            message: 'success',
-            data: user
-        });
-    }
-
     private async getProfile(req: Request, res: Response) {
         const userId = (req as any).context.user_id;
         const user = await this.userService.getProfile(userId);

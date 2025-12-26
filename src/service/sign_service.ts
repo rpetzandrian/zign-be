@@ -36,9 +36,7 @@ export class SignService extends Service {
         const count_total_size = await this.signRepository.count({
             user_id: userId
         });
-        // const signs = await this.signRepository.findAll({
-        //     user_id: userId,
-        // }, { attributes: ['id', 'user_id', 'preview_url', 'created_at'] })
+
         const signs = await this.signRepository.findAll(
             { user_id : userId },
             {
@@ -62,3 +60,5 @@ export class SignService extends Service {
         };
     }
 }
+
+export default SignService;
