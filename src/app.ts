@@ -43,7 +43,7 @@ class App extends BaseApp {
         })
     }
 
-    protected async initProviders() {
+    protected async initProviders(): Promise<void> {
         /** Initialize providers */
         await EventProvider.initialize();
 

@@ -16,7 +16,7 @@ export const SchemeValidator = (input: IObject, scheme: Joi.ObjectSchema, option
     return scheme.validateAsync(input, options)
         .catch((err: any): void => {
             const details = err.details.reduce((detail: any, item: any): IObject => {
-                detail[item.context.key] = item.message.replace(/"/g, '');
+                detail[item.context.key] = item.message.replaceAll(/"/g, '');
                 return detail;
             }, {});
             throw new UnprocessableEntityError('error validating fields', 'VALIDATION_ERROR', details);
