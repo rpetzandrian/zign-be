@@ -13,7 +13,7 @@ export const defaultOpts: UploadMiddlewareOptions = {
 
 
 export const UploadMiddleware = (opts = defaultOpts): RequestHandler => {
-    return multer({ limits: { fieldNameSize: opts.fieldSizeLimit } }).array(opts.fieldName) as any;
+    return multer({ limits: { fieldNameSize: opts.fieldSizeLimit, fileSize: 50 * 1024 * 1024 } }).array(opts.fieldName) as any;
 };
 
 export default UploadMiddleware;
