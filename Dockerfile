@@ -11,7 +11,8 @@ RUN apk add --no-cache \
     pango-dev \
     jpeg-dev \
     giflib-dev \
-    librsvg-dev
+    librsvg-dev \
+    libpng-dev
 
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -37,7 +38,8 @@ RUN apk add --no-cache \
     pango \
     jpeg \
     giflib \
-    librsvg
+    librsvg \
+    libpng
 
 WORKDIR /app
 
