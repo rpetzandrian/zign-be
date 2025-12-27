@@ -14,7 +14,7 @@ export const generateChecksum = (str: Buffer, encoding?: crypto.BinaryToTextEnco
 
 export const generateRandomNIK = () => {
     // Get last 8 digits of the phone number
-    const randomDigitsNumber = Math.floor(Math.random() * 100000000);
+    const randomDigitsNumber = Math.floor(crypto.randomInt(100000000));
     const last8Digits = randomDigitsNumber.toString().padStart(8, '0');
 
     // Generate with regex for /^0{4}\d{10}$/
@@ -34,3 +34,8 @@ export const validateImageMimeType = (file: Files) => {
         throw new BadRequestError('file format must be image', 'INVALID_FILE_FORMAT')
     }
 }
+
+export const generateOTP = (): string => {
+    const otp = crypto.randomInt(0, 1000000);
+    return otp.toString().padStart(6, '0');
+};

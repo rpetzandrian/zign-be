@@ -7,6 +7,7 @@ import { EMAIL_CODE, EVENT_LIST, OTP_CODE_EXPIRED } from "../entity/constant/com
 import { generateJwtToken } from "../lib/jwt";
 import { User } from "../entity/model/user";
 import { isAfter } from "date-fns";
+import { generateOTP } from "src/lib/helpers";
 
 export class AuthService extends Service {
     private userRepository: UserRepository;
@@ -24,7 +25,7 @@ export class AuthService extends Service {
         if (process.env.NODE_ENV !== 'production') {
             return { code: '123456', expired: expired }
         }
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const code = generateOTP()
 
         return { code, expired };
     }
