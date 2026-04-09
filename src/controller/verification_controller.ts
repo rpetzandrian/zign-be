@@ -5,7 +5,7 @@ import UploadMiddleware from "../middleware/upload_middleware";
 import { authMiddleware } from "../middleware/auth_middleware";
 import { FileService } from "../service/file_service";
 import { requestValidator } from "../middleware/request_middleware";
-import { UPLOAD_CARD } from "../entity/validation/verification";
+import { FACE_RECOGNITION, UPLOAD_CARD } from "../entity/validation/verification";
 
 
 export class VerificationController extends Controller {
@@ -43,7 +43,7 @@ export class VerificationController extends Controller {
         this._routes.post(`/v1/${this.path}/ocr`, authMiddleware, UploadMiddleware(), requestValidator(UPLOAD_CARD), (req, res) => {
             return this.verifyUser(req, res)
         })
-        this._routes.post(`/v1/${this.path}/face-recognition`, authMiddleware, UploadMiddleware(), requestValidator(UPLOAD_CARD), (req, res) => {
+        this._routes.post(`/v1/${this.path}/face-recognition`, authMiddleware, UploadMiddleware(), requestValidator(FACE_RECOGNITION), (req, res) => {
             return this.faceRecognition(req, res)
         })
     }
