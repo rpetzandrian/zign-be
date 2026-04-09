@@ -66,7 +66,7 @@ export class VerificationService extends Service {
         });
     }
 
-    public async faceRecognition(file: Files, userId: string) {
+    public async faceRecognition(file: Files, userId: string, body: {longitude?: string, latitude?: string}) {
         validateImageMimeType(file);
         const user = await this.userRepository.findOneOrFail({ id: userId });
         if (user.is_face_recognized) {
@@ -100,7 +100,9 @@ export class VerificationService extends Service {
 
         await this.userRepository.update({ id: user.id }, {
             is_face_recognized: true,
-            profile_picture: profilePicture[0].file_url
+            profile_picture: profilePicture[0].file_url,
+            longitude: body.longitude as string,
+            latitude: body.latitude as string
         });
     }
 }

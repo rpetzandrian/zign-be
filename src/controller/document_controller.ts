@@ -30,7 +30,7 @@ export class DocumentController extends Controller {
     public async previewDocument(req: Request, res: Response) {
         const { params, query } = req;
         const context = (req as any).context as { user_id: string }
-        const document = await this.documentService.previewDocument(params.id, query.type as string, context.user_id);
+        const document = await this.documentService.previewDocument(params.id as string, query.type as string, context.user_id);
         res.send({
             buffer: document.buffer,
             parameters: {
@@ -55,7 +55,7 @@ export class DocumentController extends Controller {
     public async downloadDocument(req: Request, res: Response) {
         const { params, query } = req;
         const context = (req as any).context as { user_id: string }
-        const document = await this.documentService.previewDocument(params.id, query.type as string, context.user_id);
+        const document = await this.documentService.previewDocument(params.id as string, query.type as string, context.user_id);
         res.set({
             'Content-Type': document.mime_type,
             'Content-Disposition': `attachment;filename="${document.file_name}"`,
@@ -77,7 +77,7 @@ export class DocumentController extends Controller {
 
     public async validityCheckDocument(req: Request, res: Response) {
         const { params } = req;
-        const document = await this.documentService.validityCheckDocument(params.id);
+        const document = await this.documentService.validityCheckDocument(params.id as string);
         return res.send({
             success: true,
             message: 'Validity check document',

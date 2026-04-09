@@ -29,7 +29,8 @@ export class VerificationController extends Controller {
     public async faceRecognition(req: Request, res: Response): Promise<any> {
         const data = req.files as Express.Multer.File[]
         const context = (req as any).context as { user_id: string }
-        const result = await this.verificationService.faceRecognition(data[0], context.user_id)
+        const body = req.body;
+        const result = await this.verificationService.faceRecognition(data[0], context.user_id, body)
         res.send({
             success: true,
             message: 'Success verify face!',

@@ -12,4 +12,6 @@ export interface User extends BaseModel {
     otp_code: string | null;
     otp_code_expired: Date | null;
     reset_token: string | null;
+    longitude?: string;
+    latitude?: string;
 }

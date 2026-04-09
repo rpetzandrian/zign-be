@@ -7,7 +7,7 @@ import { EMAIL_CODE, EVENT_LIST, OTP_CODE_EXPIRED } from "../entity/constant/com
 import { generateJwtToken } from "../lib/jwt";
 import { User } from "../entity/model/user";
 import { isAfter } from "date-fns";
-import { generateOTP } from "src/lib/helpers";
+import { generateOTP } from "../lib/helpers";
 
 export class AuthService extends Service {
     private userRepository: UserRepository;

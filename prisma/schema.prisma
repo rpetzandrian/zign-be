@@ -22,6 +22,8 @@ model User {
   created_at         DateTime  @default(now()) @db.Timestamp(6)
   updated_at         DateTime  @default(now()) @updatedAt @db.Timestamp(6)
   deleted_at         DateTime? @db.Timestamp(6)
+  longitude          String?   @db.VarChar(50)
+  latitude           String?   @db.VarChar(50)
 
   @@unique([email])
   @@unique([card_no])
