@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { UserService } from './service/user_service';
 import express from 'express';
+import cors from 'cors';
 import BaseApp from './base/app';
 import { getPrismaClientWithSoftDelete } from './base/prisma_middleware';
 import { UserController } from './controller/user_controller';
@@ -28,13 +29,14 @@ import FacePlusProvider from './lib/faceplus_provider';
 import { isTruthy } from './lib/helpers';
 
 class App extends BaseApp {
-    constructor({ port = 8000 }) {
+    constructor({ port = Number(process.env.APP_PORT) || 3000 }) {
         super({ port })
     }
 
     protected initPluggins() {
-        this._app.use(express.json())
-        this._app.use(express.urlencoded({ extended: false }))
+        this._app.use(cors());
+        this._app.use(express.json());
+        this._app.use(express.urlencoded({ extended: false }));
 
         this._app.get('/healthcheck', (req, res) => {
             res.send({
