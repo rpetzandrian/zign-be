@@ -6,7 +6,7 @@ export const UPLOAD_CARD = Joi.object({
 })
 
 export const FACE_RECOGNITION = Joi.object({
-    file: Joi.any().required(),
+    files: Joi.array().required(),
     body: Joi.object({
         longitude: Joi.string().required(),
         latitude: Joi.string().required()
