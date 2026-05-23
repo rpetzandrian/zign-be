@@ -1,6 +1,6 @@
 import { Service } from "../base/service";
 import { FILE_MIMETYPE, Files } from "../entity/constant/file";
-import { generateChecksum, generateUuid } from "../lib/helpers";
+import { generateChecksum, generateUuid, isTruthy } from "../lib/helpers";
 import { BadRequestError, NotFoundError } from "../base/http_error";
 import { PDFDocument } from "pdf-lib";
 import { FileService } from "./file_service";
@@ -59,17 +59,19 @@ export class DocumentService extends Service {
                 height: payload.metadata.height,
             });
 
-            const qrCodeBuffer = await this.generateSignQRCode(docs.id as string);
-            const pdfQr = await pdfDocs.embedPng(qrCodeBuffer);
-            const addedQr = pages.map((page) => {
-                page.drawImage(pdfQr, {
-                    x: 5,
-                    y: 5,
-                    width: 75,
-                    height: 75,
-                })
-            });
-            await Promise.all(addedQr);
+            if (isTruthy(process.env.FEATURE_QR_CODE)) {
+                const qrCodeBuffer = await this.generateSignQRCode(docs.id as string);
+                const pdfQr = await pdfDocs.embedPng(qrCodeBuffer);
+                const addedQr = pages.map((page) => {
+                    page.drawImage(pdfQr, {
+                        x: 5,
+                        y: 5,
+                        width: 75,
+                        height: 75,
+                    })
+                });
+                await Promise.all(addedQr);
+            }
 
             const metadata: any = { 
                 sign_at: new Date(),

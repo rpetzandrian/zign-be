@@ -10,7 +10,7 @@ export class QrGenerator {
                 nodeCanvas,
                 jsdom: JSDOM,
                 data: url,
-                image: 'https://s3.nevaobjects.id/zign-assets/zign-logo.png',
+                image: String(process.env.LOGO_URL),
                 type: 'canvas',
                 shape: "square",
                 width: 200,
